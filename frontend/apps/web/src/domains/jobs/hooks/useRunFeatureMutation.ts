@@ -4,26 +4,31 @@ import { toast } from 'sonner';
 import { getErrorDetail } from '@/domains/api/client';
 
 /**
- * Build the shared `{ mutation: { onSuccess, onError } }` config that
- * the three feature buttons (CoverLetter / CVTailor / InterviewPrep)
- * all use. Pass the result straight into the orval-generated mutation
- * hook.
+ * Build the shared `{ mutation: { onMutate, onSuccess, onError } }` config
+ * that every AI feature (CoverLetter / CVTailor / InterviewPrep / Match)
+ * runs through `FeatureSection`. Pass the result straight into the
+ * orval-generated mutation hook.
  *
- * `onSuccess` invalidates the given query key and fires a success toast.
- * `onError` reports the FastAPI `detail` field or `errorFallback`.
+ * `onMutate` (optional) fires when the mutation starts — used to drive the
+ * optimistic pending state. `onSuccess` invalidates the given query key and
+ * fires a success toast. `onError` reports the FastAPI `detail` field or
+ * `errorFallback`.
  */
 export function useFeatureMutationOptions({
   invalidateKey,
   successMessage,
   errorFallback,
+  onMutate,
 }: {
   invalidateKey: QueryKey;
   successMessage: string;
   errorFallback: string;
+  onMutate?: () => void;
 }) {
   const queryClient = useQueryClient();
   return {
     mutation: {
+      onMutate,
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: invalidateKey });
         toast.success(successMessage);

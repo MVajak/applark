@@ -1,10 +1,21 @@
+import type { ReactNode } from 'react';
+
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@postpilot/ui';
 
-import { CoverLetterSection } from '@/domains/cover_letters/components/CoverLetterSection';
-import { CVTailorSection } from '@/domains/cv_tailor/components/CVTailorSection';
-import { InterviewPrepSection } from '@/domains/interview_prep/components/InterviewPrepSection';
+import { coverLetterFeature } from '@/domains/cover_letters/feature';
+import { cvTailorFeature } from '@/domains/cv_tailor/feature';
+import { interviewPrepFeature } from '@/domains/interview_prep/feature';
 import { JOB_ACTIONS, type JobActionId } from '@/domains/jobs/actions';
-import { MatchSection } from '@/domains/matching/components/MatchSection';
+import { FeatureSection } from '@/domains/jobs/components/FeatureSection';
+import { matchFeature } from '@/domains/matching/feature';
+
+/** Maps each job action to its rendered feature section. */
+const FEATURE_SECTIONS: Record<JobActionId, (jobId: string) => ReactNode> = {
+  match: (jobId) => <FeatureSection config={matchFeature} jobId={jobId} />,
+  'cover-letter': (jobId) => <FeatureSection config={coverLetterFeature} jobId={jobId} />,
+  tailor: (jobId) => <FeatureSection config={cvTailorFeature} jobId={jobId} />,
+  'interview-prep': (jobId) => <FeatureSection config={interviewPrepFeature} jobId={jobId} />,
+};
 
 export function FeatureDrawer({
   action,
@@ -28,12 +39,7 @@ export function FeatureDrawer({
             <SheetDescription>{meta.description}</SheetDescription>
           </SheetHeader>
         )}
-        <div className="mt-4">
-          {action === 'match' && <MatchSection jobId={jobId} />}
-          {action === 'cover-letter' && <CoverLetterSection jobId={jobId} />}
-          {action === 'tailor' && <CVTailorSection jobId={jobId} />}
-          {action === 'interview-prep' && <InterviewPrepSection jobId={jobId} />}
-        </div>
+        <div className="mt-4">{action && FEATURE_SECTIONS[action](jobId)}</div>
       </SheetContent>
     </Sheet>
   );

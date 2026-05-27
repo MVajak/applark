@@ -1,6 +1,7 @@
 export * from './actions';
 export * from './components/ActionGrid';
 export * from './components/FeatureDrawer';
+export * from './components/FeatureSection';
 export * from './components/JobCreateForm';
 export * from './components/JobDetailHeader';
 export * from './components/JobListCard';

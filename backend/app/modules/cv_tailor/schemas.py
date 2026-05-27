@@ -14,9 +14,7 @@ class SuggestionKind(StrEnum):
 
 class TailorSuggestion(BaseModel):
     kind: SuggestionKind
-    cv_chunk_id: uuid.UUID = Field(
-        description="The existing CV chunk this suggestion applies to"
-    )
+    cv_chunk_id: uuid.UUID = Field(description="The existing CV chunk this suggestion applies to")
     rationale: str = Field(
         description=(
             "One sentence: why this change helps for THIS specific job. "
@@ -32,9 +30,7 @@ class TailorSuggestion(BaseModel):
 
 
 class CVTailorResult(BaseModel):
-    job_summary: str = Field(
-        description="One sentence framing what this job most cares about"
-    )
+    job_summary: str = Field(description="One sentence framing what this job most cares about")
     suggestions: list[TailorSuggestion] = Field(
         description="3-7 specific, actionable suggestions. Quality over quantity."
     )

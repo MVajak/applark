@@ -19,13 +19,9 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.execute("CREATE TYPE job_source_kind AS ENUM ('url', 'pasted')")
     op.execute(
-        "CREATE TYPE job_status AS ENUM "
-        "('pending', 'scraping', 'extracting', 'ready', 'failed')"
+        "CREATE TYPE job_status AS ENUM ('pending', 'scraping', 'extracting', 'ready', 'failed')"
     )
-    op.execute(
-        "CREATE TYPE remote_policy AS ENUM "
-        "('onsite', 'hybrid', 'remote', 'unspecified')"
-    )
+    op.execute("CREATE TYPE remote_policy AS ENUM ('onsite', 'hybrid', 'remote', 'unspecified')")
     op.execute(
         "CREATE TYPE seniority AS ENUM "
         "('junior', 'mid', 'senior', 'lead', 'principal', 'unspecified')"
@@ -60,14 +56,10 @@ def upgrade() -> None:
     op.execute("CREATE INDEX jobs_status_idx ON jobs(status)")
     op.execute("CREATE INDEX jobs_company_idx ON jobs(company)")
     op.execute("CREATE INDEX jobs_created_at_idx ON jobs(created_at DESC)")
-    op.execute(
-        "CREATE INDEX jobs_embedding_idx ON jobs "
-        "USING hnsw (embedding vector_cosine_ops)"
-    )
+    op.execute("CREATE INDEX jobs_embedding_idx ON jobs USING hnsw (embedding vector_cosine_ops)")
 
     op.execute(
-        "CREATE TYPE requirement_category AS ENUM "
-        "('required', 'nice_to_have', 'responsibility')"
+        "CREATE TYPE requirement_category AS ENUM ('required', 'nice_to_have', 'responsibility')"
     )
 
     op.execute(

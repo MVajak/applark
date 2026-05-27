@@ -33,9 +33,7 @@ async def create_run(
     return run
 
 
-async def get_latest_for_job(
-    session: AsyncSession, job_id: uuid.UUID
-) -> CVTailorRun | None:
+async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> CVTailorRun | None:
     stmt = (
         select(CVTailorRun)
         .where(CVTailorRun.job_id == job_id)

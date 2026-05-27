@@ -35,9 +35,7 @@ async def create_run(
     return run
 
 
-async def get_latest_for_job(
-    session: AsyncSession, job_id: uuid.UUID
-) -> InterviewPrepRun | None:
+async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> InterviewPrepRun | None:
     stmt = (
         select(InterviewPrepRun)
         .where(InterviewPrepRun.job_id == job_id)

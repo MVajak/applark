@@ -104,9 +104,7 @@ async def get_jobs(
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[JobListItem]:
     async with SessionLocal() as session:
-        jobs = await repository.list_jobs(
-            session, status=status_filter, limit=limit, offset=offset
-        )
+        jobs = await repository.list_jobs(session, status=status_filter, limit=limit, offset=offset)
         return [JobListItem.model_validate(j) for j in jobs]
 
 
@@ -160,16 +158,11 @@ async def retry_job(
         if job.status != JobStatus.failed:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Job status is '{job.status.value}'; only 'failed' "
-                    "jobs can be retried"
-                ),
+                detail=(f"Job status is '{job.status.value}'; only 'failed' jobs can be retried"),
             )
 
         task_name = (
-            "scrape_and_extract_job"
-            if job.source_kind == JobSourceKind.url
-            else "extract_job"
+            "scrape_and_extract_job" if job.source_kind == JobSourceKind.url else "extract_job"
         )
 
         job.status = JobStatus.pending

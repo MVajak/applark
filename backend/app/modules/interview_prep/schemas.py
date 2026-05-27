@@ -15,9 +15,7 @@ class QuestionCategory(StrEnum):
 
 class InterviewQuestion(BaseModel):
     category: QuestionCategory
-    question: str = Field(
-        description="The full question as the interviewer would ask it"
-    )
+    question: str = Field(description="The full question as the interviewer would ask it")
     why_likely: str = Field(
         description=(
             "One sentence: why this question is likely for THIS specific role. "

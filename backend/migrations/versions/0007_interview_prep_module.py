@@ -33,9 +33,7 @@ def upgrade() -> None:
         )
         """
     )
-    op.execute(
-        "CREATE INDEX interview_prep_runs_job_id_idx ON interview_prep_runs(job_id)"
-    )
+    op.execute("CREATE INDEX interview_prep_runs_job_id_idx ON interview_prep_runs(job_id)")
 
 
 def downgrade() -> None:

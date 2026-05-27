@@ -63,15 +63,10 @@ class JobExtraction(BaseModel):
     company: str | None = Field(
         description="Company name as written in the posting. Null if not stated."
     )
-    location: str | None = Field(
-        description="City and/or region as written. Null if not stated."
-    )
+    location: str | None = Field(description="City and/or region as written. Null if not stated.")
     remote_policy: RemotePolicy = Field(
         default=RemotePolicy.unspecified,
-        description=(
-            "Remote work policy if stated. 'unspecified' when the posting "
-            "doesn't say."
-        ),
+        description=("Remote work policy if stated. 'unspecified' when the posting doesn't say."),
     )
     seniority: Seniority = Field(
         default=Seniority.unspecified,
@@ -90,8 +85,7 @@ class JobExtraction(BaseModel):
     )
     salary_range: str | None = Field(
         description=(
-            "Salary range as written, e.g. '€60-80k', '$120k-$150k base'. "
-            "Null if not stated."
+            "Salary range as written, e.g. '€60-80k', '$120k-$150k base'. Null if not stated."
         )
     )
     summary: str | None = Field(
@@ -103,8 +97,7 @@ class JobExtraction(BaseModel):
     )
     requirements: list[ExtractedRequirement] = Field(
         description=(
-            "One item per clause. Split bulleted lists so each item is its "
-            "own requirement entry."
+            "One item per clause. Split bulleted lists so each item is its own requirement entry."
         )
     )
 

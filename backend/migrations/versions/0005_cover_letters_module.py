@@ -39,9 +39,7 @@ def upgrade() -> None:
         )
         """
     )
-    op.execute(
-        "CREATE INDEX cover_letter_drafts_job_id_idx ON cover_letter_drafts(job_id)"
-    )
+    op.execute("CREATE INDEX cover_letter_drafts_job_id_idx ON cover_letter_drafts(job_id)")
 
 
 def downgrade() -> None:

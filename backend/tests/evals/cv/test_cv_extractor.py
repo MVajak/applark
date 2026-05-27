@@ -28,10 +28,7 @@ async def test_cv_extractor(case_file: Path) -> None:
     from app.modules.cv.agent import cv_extractor
 
     case: dict[str, Any] = json.loads(case_file.read_text())
-    user_message = (
-        f"<cv>\n{case['input']}\n</cv>\n\n"
-        "Extract structured chunks per the rules above."
-    )
+    user_message = f"<cv>\n{case['input']}\n</cv>\n\nExtract structured chunks per the rules above."
     result = await cv_extractor.run(user_message)
     output = result.output
     expected: dict[str, Any] = case["expected"]

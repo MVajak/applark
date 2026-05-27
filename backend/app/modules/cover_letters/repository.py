@@ -37,9 +37,7 @@ async def create_draft(
     return draft
 
 
-async def list_for_job(
-    session: AsyncSession, job_id: uuid.UUID
-) -> Sequence[CoverLetterDraft]:
+async def list_for_job(session: AsyncSession, job_id: uuid.UUID) -> Sequence[CoverLetterDraft]:
     stmt = (
         select(CoverLetterDraft)
         .where(CoverLetterDraft.job_id == job_id)

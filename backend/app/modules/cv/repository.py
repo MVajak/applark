@@ -39,12 +39,7 @@ async def list_documents(
     limit: int = 50,
     offset: int = 0,
 ) -> Sequence[CVDocument]:
-    stmt = (
-        select(CVDocument)
-        .order_by(CVDocument.created_at.desc())
-        .limit(limit)
-        .offset(offset)
-    )
+    stmt = select(CVDocument).order_by(CVDocument.created_at.desc()).limit(limit).offset(offset)
     if kind is not None:
         stmt = stmt.where(CVDocument.kind == kind)
     result = await session.execute(stmt)

@@ -46,9 +46,7 @@ def pytest_configure(config: pytest.Config) -> None:
         pydantic_ai.models.ALLOW_MODEL_REQUESTS = True
 
 
-def pytest_collection_modifyitems(
-    config: pytest.Config, items: list[pytest.Item]
-) -> None:
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
     if config.getoption("--run-evals"):
         return  # User opted in — run everything as-is.
 

@@ -47,8 +47,7 @@ Compensation: €70-90k plus equity.
 async def main() -> None:
     if not settings.ANTHROPIC_API_KEY:
         sys.exit(
-            "ANTHROPIC_API_KEY is empty in backend/.env. "
-            "Add a real key and rerun this script."
+            "ANTHROPIC_API_KEY is empty in backend/.env. Add a real key and rerun this script."
         )
     os.environ["ANTHROPIC_API_KEY"] = settings.ANTHROPIC_API_KEY
 

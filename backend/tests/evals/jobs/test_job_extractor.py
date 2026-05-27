@@ -53,14 +53,12 @@ async def test_job_extractor(case_file: Path) -> None:
 
     if "remote_policy" in expected:
         assert output.remote_policy.value == expected["remote_policy"], (
-            f"remote_policy: got {output.remote_policy.value}, "
-            f"expected {expected['remote_policy']}"
+            f"remote_policy: got {output.remote_policy.value}, expected {expected['remote_policy']}"
         )
 
     if "seniority" in expected:
         assert output.seniority.value == expected["seniority"], (
-            f"seniority: got {output.seniority.value}, "
-            f"expected {expected['seniority']}"
+            f"seniority: got {output.seniority.value}, expected {expected['seniority']}"
         )
 
     if "tech_stack_includes" in expected:
@@ -71,13 +69,10 @@ async def test_job_extractor(case_file: Path) -> None:
 
     if "salary_range" in expected:
         assert output.salary_range == expected["salary_range"], (
-            f"salary_range: got {output.salary_range!r}, "
-            f"expected {expected['salary_range']!r}"
+            f"salary_range: got {output.salary_range!r}, expected {expected['salary_range']!r}"
         )
 
     if "min_requirements" in expected:
         actual_count = len(output.requirements)
         min_count = expected["min_requirements"]
-        assert actual_count >= min_count, (
-            f"requirements count {actual_count} < min {min_count}"
-        )
+        assert actual_count >= min_count, f"requirements count {actual_count} < min {min_count}"

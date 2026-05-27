@@ -12,9 +12,7 @@ class MappedExperience(BaseModel):
     cv_chunk_excerpt: str = Field(
         description="The candidate's actual wording, quoted from their CV"
     )
-    why_it_matches: str = Field(
-        description="One specific sentence, no generic claims"
-    )
+    why_it_matches: str = Field(description="One specific sentence, no generic claims")
 
 
 class Gap(BaseModel):

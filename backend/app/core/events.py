@@ -89,9 +89,7 @@ def sse_response(request: Request, redis: Redis, channel: str) -> StreamingRespo
             while True:
                 if await request.is_disconnected():
                     return
-                done, _ = await asyncio.wait(
-                    {next_task}, timeout=SSE_KEEPALIVE_SECONDS
-                )
+                done, _ = await asyncio.wait({next_task}, timeout=SSE_KEEPALIVE_SECONDS)
                 if not done:
                     yield b": keepalive\n\n"
                     continue

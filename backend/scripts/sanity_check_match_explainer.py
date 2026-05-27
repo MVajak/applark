@@ -153,12 +153,8 @@ async def main() -> None:
     print("=" * 70)
     print(f"Model: {LLM_MODEL_SMART}")
     print(f"Tokens — input: {usage.input_tokens}  output: {usage.output_tokens}")
-    print(
-        f"  cache_creation_input_tokens: {details.get('cache_creation_input_tokens', 0)}"
-    )
-    print(
-        f"  cache_read_input_tokens: {details.get('cache_read_input_tokens', 0)}"
-    )
+    print(f"  cache_creation_input_tokens: {details.get('cache_creation_input_tokens', 0)}")
+    print(f"  cache_read_input_tokens: {details.get('cache_read_input_tokens', 0)}")
 
 
 if __name__ == "__main__":

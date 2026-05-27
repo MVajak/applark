@@ -28,9 +28,7 @@ def write_baseline(module: str) -> Path:
     hash_value = current_hash(module)
     baseline = prompts_path(module).parent / "prompts.baseline.toml"
     today = dt.date.today().isoformat()
-    baseline.write_text(
-        f'[prompts]\nhash = "{hash_value}"\nbaselined_at = "{today}"\n'
-    )
+    baseline.write_text(f'[prompts]\nhash = "{hash_value}"\nbaselined_at = "{today}"\n')
     return baseline
 
 

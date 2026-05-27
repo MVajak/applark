@@ -60,8 +60,7 @@ def upgrade() -> None:
     op.execute("CREATE INDEX cv_chunks_document_id_idx ON cv_chunks(document_id)")
     op.execute("CREATE INDEX cv_chunks_chunk_type_idx ON cv_chunks(chunk_type)")
     op.execute(
-        "CREATE INDEX cv_chunks_embedding_idx ON cv_chunks "
-        "USING hnsw (embedding vector_cosine_ops)"
+        "CREATE INDEX cv_chunks_embedding_idx ON cv_chunks USING hnsw (embedding vector_cosine_ops)"
     )
 
 

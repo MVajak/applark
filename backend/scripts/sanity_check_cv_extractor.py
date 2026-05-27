@@ -41,8 +41,7 @@ Languages — English (native), Finnish (fluent)
 async def main() -> None:
     if not settings.ANTHROPIC_API_KEY:
         sys.exit(
-            "ANTHROPIC_API_KEY is empty in backend/.env. "
-            "Add a real key and rerun this script."
+            "ANTHROPIC_API_KEY is empty in backend/.env. Add a real key and rerun this script."
         )
     os.environ["ANTHROPIC_API_KEY"] = settings.ANTHROPIC_API_KEY
 
@@ -50,10 +49,7 @@ async def main() -> None:
     from app.core.llm import LLM_MODEL_FAST
     from app.modules.cv.agent import cv_extractor
 
-    user_message = (
-        f"<cv>\n{SAMPLE_CV}\n</cv>\n\n"
-        "Extract structured chunks per the rules above."
-    )
+    user_message = f"<cv>\n{SAMPLE_CV}\n</cv>\n\nExtract structured chunks per the rules above."
     result = await cv_extractor.run(user_message)
 
     print("=" * 70)

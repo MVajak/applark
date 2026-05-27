@@ -1,7 +1,7 @@
 import { CheckCircle2, Circle, Loader2, OctagonX } from 'lucide-react';
 import { motion } from 'motion/react';
 
-import { cn } from '@postpilot/ui';
+import { cn } from '@applark/ui';
 
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
 

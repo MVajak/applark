@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Card, cn, Skeleton } from '@postpilot/ui';
+import { Card, cn, Skeleton } from '@applark/ui';
 
 const ROTATE_INTERVAL_MS = 3500;
 

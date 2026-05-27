@@ -17,7 +17,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@postpilot/ui':
+      '@applark/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tailwindcss/vite':

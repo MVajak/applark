@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@postpilot/ui';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@applark/ui';
 
 import { coverLetterFeature } from '@/domains/cover_letters/feature';
 import { cvTailorFeature } from '@/domains/cv_tailor/feature';

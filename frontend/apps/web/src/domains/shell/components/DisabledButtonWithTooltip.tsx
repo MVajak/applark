@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 
-import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@postpilot/ui';
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@applark/ui';
 
 type DisabledButtonProps = Omit<ComponentProps<typeof Button>, 'disabled' | 'children'> & {
   label: ReactNode;

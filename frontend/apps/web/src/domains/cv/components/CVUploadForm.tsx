@@ -2,7 +2,7 @@ import { type FormEvent, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@postpilot/ui';
+import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@applark/ui';
 
 import { getGetCvDocumentsQueryKey, useCreateCvDocument } from '@/domains/api/generated/cv/cv';
 import { CVDocumentKind } from '@/domains/api/generated/model/cVDocumentKind';

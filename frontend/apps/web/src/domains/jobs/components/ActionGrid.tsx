@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 
-import { Badge, Card } from '@postpilot/ui';
+import { Badge, Card } from '@applark/ui';
 
 import { useCapabilities } from '@/domains/auth/capabilities';
 import { JOB_ACTIONS, type JobAction, type JobActionId } from '@/domains/jobs/actions';

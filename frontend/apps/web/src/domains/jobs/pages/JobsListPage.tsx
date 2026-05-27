@@ -3,7 +3,7 @@ import { Briefcase, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
 
-import { Button, cn, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Skeleton } from '@postpilot/ui';
+import { Button, cn, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Skeleton } from '@applark/ui';
 
 import { useGetJobs } from '@/domains/api/generated/jobs/jobs';
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
@@ -107,7 +107,7 @@ export function JobsListPage() {
           title={filter === 'all' ? 'No jobs yet' : 'No jobs match this filter'}
           description={
             filter === 'all'
-              ? 'Add a job posting URL or paste the text — PostPilot will scrape, extract, and prepare it for matching.'
+              ? 'Add a job posting URL or paste the text — Applark will scrape, extract, and prepare it for matching.'
               : 'Try selecting a different filter above.'
           }
           action={

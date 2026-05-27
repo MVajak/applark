@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { NavLink } from 'react-router-dom';
 
-import { cn } from '@postpilot/ui';
+import { cn } from '@applark/ui';
 
 import { BrandMark } from '@/domains/shell/components/BrandMark';
 import { useSpotlightStore } from '@/domains/shell/spotlight-store';

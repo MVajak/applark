@@ -1,6 +1,6 @@
 import { FileText } from 'lucide-react';
 
-import { Skeleton } from '@postpilot/ui';
+import { Skeleton } from '@applark/ui';
 
 import { useGetCvDocuments } from '@/domains/api/generated/cv/cv';
 import { CVDocumentCard } from '@/domains/cv/components/CVDocumentCard';
@@ -37,7 +37,7 @@ export function CVPage() {
           <EmptyState
             icon={FileText}
             title="No CVs uploaded yet"
-            description="Drop a PDF above to get started. Once it's parsed, PostPilot can match it against any job posting you add."
+            description="Drop a PDF above to get started. Once it's parsed, Applark can match it against any job posting you add."
           />
         )}
       </section>

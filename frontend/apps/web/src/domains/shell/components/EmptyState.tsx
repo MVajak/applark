@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
-import { cn } from '@postpilot/ui';
+import { cn } from '@applark/ui';
 
 export function EmptyState({
   icon: Icon,

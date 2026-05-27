@@ -1,6 +1,6 @@
-# Postpilot — Build Plan
+# Applark — Build Plan
 
-A concrete, paste-into-Claude-Code spec for Postpilot, a FastAPI + React side project that
+A concrete, paste-into-Claude-Code spec for Applark, a FastAPI + React side project that
 ingests CVs and job postings, embeds them in pgvector, and uses Pydantic AI
 agents to extract structure and explain matches.
 
@@ -28,7 +28,7 @@ No auth in v1. Single-user. Add auth later.
 ## 1. Monorepo layout
 
 ```
-postpilot/
+applark/
 ├── README.md
 ├── docker-compose.yml
 ├── .gitignore
@@ -148,7 +148,7 @@ postpilot/
 
 ```toml
 [project]
-name = "postpilot"
+name = "applark"
 version = "0.1.0"
 requires-python = ">=3.13,<3.14"
 dependencies = [
@@ -222,7 +222,7 @@ mkdir backend frontend
 
 # backend
 cd backend
-uv init --name postpilot --python 3.13
+uv init --name applark --python 3.13
 uv sync
 uv run alembic init migrations
 uv run pre-commit install
@@ -247,13 +247,13 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_DB: postpilot
-      POSTGRES_USER: postpilot
+      POSTGRES_DB: applark
+      POSTGRES_USER: applark
       POSTGRES_PASSWORD: dev
     ports: ["5432:5432"]
     volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postpilot"]
+      test: ["CMD-SHELL", "pg_isready -U applark"]
       interval: 5s
 
   redis:
@@ -275,7 +275,7 @@ volumes:
 `backend/.env.example`:
 
 ```bash
-DATABASE_URL=postgresql+asyncpg://postpilot:dev@localhost:5432/postpilot
+DATABASE_URL=postgresql+asyncpg://applark:dev@localhost:5432/applark
 REDIS_URL=redis://localhost:6379/0
 
 ANTHROPIC_API_KEY=sk-ant-...
@@ -1330,7 +1330,7 @@ the user can wait. No ARQ task needed.
 import { defineConfig } from 'orval';
 
 export default defineConfig({
-  postpilot: {
+  applark: {
     input: { target: 'http://localhost:8000/api/v1/openapi.json' },
     output: {
       mode: 'tags-split',

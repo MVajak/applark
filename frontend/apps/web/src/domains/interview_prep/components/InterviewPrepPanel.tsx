@@ -1,4 +1,4 @@
-import { Badge, Card } from '@postpilot/ui';
+import { Badge, Card } from '@applark/ui';
 
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
 import type { InterviewPrepRunRead } from '@/domains/api/generated/model/interviewPrepRunRead';

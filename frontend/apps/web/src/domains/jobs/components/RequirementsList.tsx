@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
-import { Button, Card } from '@postpilot/ui';
+import { Button, Card } from '@applark/ui';
 
 import type { JobRequirementRead } from '@/domains/api/generated/model/jobRequirementRead';
 import { RequirementCategory } from '@/domains/api/generated/model/requirementCategory';

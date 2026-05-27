@@ -11,7 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
   truncate,
-} from '@postpilot/ui';
+} from '@applark/ui';
 
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
 import type { InterviewQuestion } from '@/domains/api/generated/model/interviewQuestion';

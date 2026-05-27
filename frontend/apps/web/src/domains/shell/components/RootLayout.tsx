@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 
-import { Toaster, TooltipProvider } from '@postpilot/ui';
+import { Toaster, TooltipProvider } from '@applark/ui';
 
 import { useCvEvents, useJobEvents } from '@/domains/api/events';
 import { AppHeader } from '@/domains/shell/components/AppHeader';

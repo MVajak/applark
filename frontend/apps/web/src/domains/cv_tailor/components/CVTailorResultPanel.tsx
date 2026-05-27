@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Button, Card, cn } from '@postpilot/ui';
+import { Button, Card, cn } from '@applark/ui';
 
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
 import type { CVTailorRunRead } from '@/domains/api/generated/model/cVTailorRunRead';

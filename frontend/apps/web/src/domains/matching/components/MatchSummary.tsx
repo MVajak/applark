@@ -1,4 +1,4 @@
-import { Card } from '@postpilot/ui';
+import { Card } from '@applark/ui';
 
 export function MatchSummary({ summary }: { summary: string }) {
   return (

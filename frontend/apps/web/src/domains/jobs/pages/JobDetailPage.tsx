@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import { Alert, AlertDescription, AlertTitle, Button, Skeleton } from '@postpilot/ui';
+import { Alert, AlertDescription, AlertTitle, Button, Skeleton } from '@applark/ui';
 
 import { useGetJob, useRetryJob } from '@/domains/api/generated/jobs/jobs';
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';

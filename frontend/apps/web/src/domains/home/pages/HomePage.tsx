@@ -3,7 +3,7 @@ import { ArrowRight, Briefcase, CheckCircle2, Command, FileText, Loader2, Octago
 import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Button } from '@postpilot/ui';
+import { Button } from '@applark/ui';
 
 import { useGetJobs } from '@/domains/api/generated/jobs/jobs';
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
@@ -65,7 +65,7 @@ export function HomePage() {
           <EmptyState
             icon={Briefcase}
             title="No jobs yet"
-            description="Add your first job posting to see PostPilot match it against your CV."
+            description="Add your first job posting to see Applark match it against your CV."
             action={
               <Button variant="gradient" onClick={() => navigate('/jobs?new=url')}>
                 <Plus className="size-4" /> Add your first job
@@ -81,13 +81,13 @@ export function HomePage() {
           <QuickActionCard
             icon={Plus}
             label="Add a job"
-            description="Paste a posting URL or text — PostPilot scrapes and extracts."
+            description="Paste a posting URL or text — Applark scrapes and extracts."
             onClick={() => navigate('/jobs?new=url')}
           />
           <QuickActionCard
             icon={FileText}
             label="Upload a CV"
-            description="Drop a PDF — PostPilot parses it for matching against any job."
+            description="Drop a PDF — Applark parses it for matching against any job."
             onClick={() => navigate('/cv')}
           />
           <QuickActionCard
@@ -114,7 +114,7 @@ function Hero() {
       <div className="relative space-y-6">
         <div className="space-y-3">
           <h1 className="text-display-default-bold text-gradient tracking-tight md:text-display-large-bold">
-            PostPilot
+            Applark
           </h1>
           <p className="max-w-xl text-body-large text-muted-foreground">
             Land the role. Tailor your story to every job posting — match, draft, and prep with your CV as the anchor.

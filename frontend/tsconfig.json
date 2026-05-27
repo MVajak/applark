@@ -15,8 +15,8 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@postpilot/ui": ["./packages/ui"],
-      "@postpilot/ui/*": ["./packages/ui/*"]
+      "@applark/ui": ["./packages/ui"],
+      "@applark/ui/*": ["./packages/ui/*"]
     }
   },
   "include": ["packages/ui/**/*.ts", "packages/ui/**/*.tsx"],

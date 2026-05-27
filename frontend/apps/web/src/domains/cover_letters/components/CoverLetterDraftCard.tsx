@@ -13,7 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
   truncate,
-} from '@postpilot/ui';
+} from '@applark/ui';
 
 import type { CoverLetterDraftRead } from '@/domains/api/generated/model/coverLetterDraftRead';
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';

@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { ArrowDown, Check, Copy, Pencil, Plus } from 'lucide-react';
 
-import { Button, cn, copyToClipboard } from '@postpilot/ui';
+import { Button, cn, copyToClipboard } from '@applark/ui';
 
 import { SuggestionKind } from '@/domains/api/generated/model/suggestionKind';
 import type { TailorSuggestion } from '@/domains/api/generated/model/tailorSuggestion';

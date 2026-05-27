@@ -1,4 +1,4 @@
-import { cn } from '@postpilot/ui';
+import { cn } from '@applark/ui';
 
 import type { Gap } from '@/domains/api/generated/model/gap';
 

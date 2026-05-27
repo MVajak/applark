@@ -1,4 +1,4 @@
-import { cn } from '@postpilot/ui';
+import { cn } from '@applark/ui';
 
 function bandColor(score: number): {
   stroke: string;

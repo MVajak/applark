@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 
-import { Button } from '@postpilot/ui';
+import { Button } from '@applark/ui';
 
 import {
   getGetCoverLettersQueryKey,

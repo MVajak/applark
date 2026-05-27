@@ -1,4 +1,4 @@
-import { Separator } from '@postpilot/ui';
+import { Separator } from '@applark/ui';
 
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
 import { CVChunkType } from '@/domains/api/generated/model/cVChunkType';

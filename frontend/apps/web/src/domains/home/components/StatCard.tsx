@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
 
-import { Card, cn } from '@postpilot/ui';
+import { Card, cn } from '@applark/ui';
 
 export function StatCard({
   icon: Icon,

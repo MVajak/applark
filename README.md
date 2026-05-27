@@ -1,4 +1,4 @@
-# PostPilot
+# Applark
 
 FastAPI + React side project that ingests CVs and job postings, embeds them in
 pgvector, and uses Pydantic AI agents to extract structure and explain matches.

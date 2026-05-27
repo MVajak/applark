@@ -1,5 +1,5 @@
 {
-  "name": "postpilot-frontend",
+  "name": "applark-frontend",
   "private": true,
   "version": "0.0.0",
   "packageManager": "pnpm@10.19.0",
@@ -8,13 +8,13 @@
     "pnpm": ">=10.0.0"
   },
   "scripts": {
-    "dev": "pnpm --filter @postpilot/web dev",
-    "build": "pnpm --filter @postpilot/web build",
-    "preview": "pnpm --filter @postpilot/web preview",
+    "dev": "pnpm --filter @applark/web dev",
+    "build": "pnpm --filter @applark/web build",
+    "preview": "pnpm --filter @applark/web preview",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "gen:api": "pnpm --filter @postpilot/web gen:api",
+    "gen:api": "pnpm --filter @applark/web gen:api",
     "typecheck": "pnpm --recursive typecheck"
   },
   "devDependencies": {

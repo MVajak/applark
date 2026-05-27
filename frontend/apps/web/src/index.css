@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@postpilot/ui/styles";
+@import "@applark/ui/styles";
 
 /* Scan UI package for Tailwind classes */
 @source "../../../packages/ui";

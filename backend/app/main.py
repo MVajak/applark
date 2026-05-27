@@ -48,7 +48,7 @@ def _operation_id(route: APIRoute) -> str:
 
 
 app = FastAPI(
-    title="PostPilot",
+    title="Applark",
     version="0.1.0",
     openapi_url="/api/v1/openapi.json",
     docs_url="/docs",

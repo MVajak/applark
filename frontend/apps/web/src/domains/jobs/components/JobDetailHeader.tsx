@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 
-import { Badge } from '@postpilot/ui';
+import { Badge } from '@applark/ui';
 
 import type { JobRead } from '@/domains/api/generated/model/jobRead';
 import { RemotePolicy } from '@/domains/api/generated/model/remotePolicy';

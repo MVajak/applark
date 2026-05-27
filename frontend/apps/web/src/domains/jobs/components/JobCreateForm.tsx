@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import { Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from '@postpilot/ui';
+import { Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from '@applark/ui';
 
 import { getErrorDetail, getErrorDetailObject, getErrorStatus } from '@/domains/api/client';
 import { getGetJobsQueryKey, useCreateJobFromText, useCreateJobFromUrl } from '@/domains/api/generated/jobs/jobs';

@@ -1,7 +1,7 @@
 import { defineConfig } from 'orval';
 
 export default defineConfig({
-  postpilot: {
+  applark: {
     input: { target: 'http://localhost:8000/api/v1/openapi.json' },
     output: {
       mode: 'tags-split',

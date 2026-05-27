@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react';
 
-import { Card, Separator } from '@postpilot/ui';
+import { Card, Separator } from '@applark/ui';
 
 import { getGetLatestMatchQueryKey, useGetLatestMatch, useRunMatch } from '@/domains/api/generated/matching/matching';
 import type { GetLatestMatch200 } from '@/domains/api/generated/model/getLatestMatch200';

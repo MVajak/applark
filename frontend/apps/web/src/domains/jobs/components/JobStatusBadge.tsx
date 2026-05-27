@@ -1,4 +1,4 @@
-import { Badge, cn } from '@postpilot/ui';
+import { Badge, cn } from '@applark/ui';
 
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
 

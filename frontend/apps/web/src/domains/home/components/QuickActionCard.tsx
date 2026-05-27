@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 
-import { Card } from '@postpilot/ui';
+import { Card } from '@applark/ui';
 
 export function QuickActionCard({
   icon: Icon,

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { QueryKey } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 
-import { Button, Card, Skeleton } from '@postpilot/ui';
+import { Button, Card, Skeleton } from '@applark/ui';
 
 import { useGetCvDocuments } from '@/domains/api/generated/cv/cv';
 import { useGetLatestMatch } from '@/domains/api/generated/matching/matching';

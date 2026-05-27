@@ -1,7 +1,7 @@
 import { LaptopIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-import { cn } from '@postpilot/ui';
+import { cn } from '@applark/ui';
 
 import { type Theme, useThemeStore } from '@/domains/theme/store';
 

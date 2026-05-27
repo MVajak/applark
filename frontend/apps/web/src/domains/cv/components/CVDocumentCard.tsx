@@ -20,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
   relativeTime,
-} from '@postpilot/ui';
+} from '@applark/ui';
 
 import { getGetCvDocumentsQueryKey, useDeleteCvDocument } from '@/domains/api/generated/cv/cv';
 import type { CVDocumentRead } from '@/domains/api/generated/model/cVDocumentRead';

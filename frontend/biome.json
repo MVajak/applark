@@ -34,9 +34,9 @@
           "options": {
             "groups": [
               "react",
-              [":PACKAGE:", "!@postpilot/**"],
+              [":PACKAGE:", "!@applark/**"],
               ":BLANK_LINE:",
-              "@postpilot/**",
+              "@applark/**",
               ":BLANK_LINE:",
               "@/**",
               ":BLANK_LINE:",

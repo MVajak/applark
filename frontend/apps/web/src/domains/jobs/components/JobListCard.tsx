@@ -1,7 +1,7 @@
 import { Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { Card, relativeTime } from '@postpilot/ui';
+import { Card, relativeTime } from '@applark/ui';
 
 import type { JobListItem } from '@/domains/api/generated/model/jobListItem';
 import { JobStatusBadge } from '@/domains/jobs/components/JobStatusBadge';

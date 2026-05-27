@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@postpilot/ui';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@applark/ui';
 
 import { useSpotlightStore } from '@/domains/shell/spotlight-store';
 import { type Theme, useThemeStore } from '@/domains/theme/store';

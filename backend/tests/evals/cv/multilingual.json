@@ -1,0 +1,8 @@
+{
+  "input": "Liis Tamm — Tarkvarainsener / Software Engineer\n\nLanguages: Estonian (native), English (fluent), Finnish (intermediate).\nAsukoht: Tallinn.\n\nTartu Ülikool (2019), BSc Arvutiteadus / Computer Science\n\nBolt OÜ — Backend Engineer (Aug 2020 — Mar 2024)\n- Maintained the Estonian-localised pricing service, ~500 RPS at peak\n- Migrated Kafka consumers from Java 11 to Java 21\n\nPersonal project — eesti-keele-sõnastik (2023)\nWord-of-the-day API in Go, free for Estonian schools.",
+  "expected": {
+    "candidate_name": "Liis Tamm",
+    "languages_spoken": ["estonian", "english", "finnish"],
+    "chunk_types_present": ["education", "experience", "project"]
+  }
+}

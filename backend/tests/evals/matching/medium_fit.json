@@ -1,0 +1,33 @@
+{
+  "context": {
+    "job": {
+      "title": "Senior Full-Stack Engineer",
+      "company": "Hex",
+      "location": "London / Remote",
+      "remote_policy": "hybrid",
+      "seniority": "senior",
+      "tech_stack": ["python", "fastapi", "typescript", "react", "postgresql"],
+      "summary": "Senior full-stack role on the analytics product. Build features end-to-end across Python API and React frontend, design data models, mentor mid-level engineers."
+    },
+    "candidate_chunks": [
+      {"cv_chunk_id": "11111111-1111-1111-1111-111111111111", "chunk_type": "summary", "content": "8 years building React applications, including a year as feature lead at Katana MRP", "metadata": {}, "similarity": 0.66},
+      {"cv_chunk_id": "22222222-2222-2222-2222-222222222222", "chunk_type": "experience", "content": "Built a JWT/OTP auth flow from scratch at ObsidianOS, covering token rotation and rate-limited OTP delivery", "metadata": {"company": "ObsidianOS"}, "similarity": 0.63},
+      {"cv_chunk_id": "33333333-3333-3333-3333-333333333333", "chunk_type": "experience", "content": "Designed PostgreSQL schemas and SQL import pipelines for the LottoLens data platform across multiple lottery types", "metadata": {"company": "LottoLens"}, "similarity": 0.74},
+      {"cv_chunk_id": "44444444-4444-4444-4444-444444444444", "chunk_type": "skill", "content": "TypeScript, React, Vite, TanStack Query, Tailwind, Node.js", "metadata": {}, "similarity": 0.65},
+      {"cv_chunk_id": "55555555-5555-5555-5555-555555555555", "chunk_type": "experience", "content": "Planned and shipped a 170-ticket ingredient booking feature as feature lead at Katana MRP", "metadata": {"company": "Katana MRP"}, "similarity": 0.59}
+    ],
+    "requirement_matches": [
+      {"requirement_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1", "requirement_text": "5+ years shipping production web applications", "category": "required", "top_chunks": [{"cv_chunk_id": "11111111-1111-1111-1111-111111111111", "content": "8 years building React applications, including a year as feature lead at Katana MRP", "similarity": 0.72}]},
+      {"requirement_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2", "requirement_text": "Strong TypeScript and modern React", "category": "required", "top_chunks": [{"cv_chunk_id": "44444444-4444-4444-4444-444444444444", "content": "TypeScript, React, Vite, TanStack Query, Tailwind, Node.js", "similarity": 0.79}]},
+      {"requirement_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3", "requirement_text": "Python backend experience with FastAPI", "category": "required", "top_chunks": [{"cv_chunk_id": "22222222-2222-2222-2222-222222222222", "content": "Built a JWT/OTP auth flow from scratch at ObsidianOS, covering token rotation and rate-limited OTP delivery", "similarity": 0.39}]},
+      {"requirement_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4", "requirement_text": "Experience designing relational data models", "category": "required", "top_chunks": [{"cv_chunk_id": "33333333-3333-3333-3333-333333333333", "content": "Designed PostgreSQL schemas and SQL import pipelines for the LottoLens data platform across multiple lottery types", "similarity": 0.80}]},
+      {"requirement_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5", "requirement_text": "Experience with data analytics or BI products", "category": "nice_to_have", "top_chunks": [{"cv_chunk_id": "33333333-3333-3333-3333-333333333333", "content": "Designed PostgreSQL schemas and SQL import pipelines for the LottoLens data platform across multiple lottery types", "similarity": 0.52}]}
+    ]
+  },
+  "expected": {
+    "min_score": 0.4,
+    "max_score": 0.7,
+    "min_strengths": 2,
+    "min_gaps": 1
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "input": "ANDRÉ          DA SILVA\n\n   Backend  developer.   Worked   at   FintaCo   2017-2022,   then\n   freelance  ever  since,  mostly  for  EU  fintech  startups.\n\n   Stack:    Java,    Kotlin,     PostgreSQL,    AWS,     terraform.",
+  "expected": {
+    "candidate_name": "ANDRÉ DA SILVA",
+    "languages_spoken": [],
+    "chunk_types_present": ["experience", "skill"]
+  }
+}

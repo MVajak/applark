@@ -1,0 +1,8 @@
+{
+  "input": "Marta Visser — Data Engineer\nmarta.visser@example.com\n\nAbout me\nData engineer with 5 years of experience building ETL pipelines on Snowflake and dbt for SaaS analytics teams.\n\nExperience\nLemonpie — Senior Data Engineer (Feb 2023 — present)\n- Migrated 12 legacy Airflow DAGs to dbt + Snowflake, cutting nightly run time from 4h to 35min\n- Owned the customer-facing data export API, handling roughly 50k weekly requests\n\nEducation\nTU Delft (2018), MSc Computer Science\n\nTooling: SQL, Python, dbt, Snowflake, Airflow, Terraform",
+  "expected": {
+    "candidate_name": "Marta Visser",
+    "languages_spoken": [],
+    "chunk_types_present": ["summary", "experience", "education", "skill"]
+  }
+}

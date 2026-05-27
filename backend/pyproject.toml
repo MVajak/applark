@@ -42,8 +42,12 @@ target-version = "py313"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
 
+[tool.ruff.lint.per-file-ignores]
+"app/modules/*/prompts.py" = ["E501"]  # LLM prompts are long-form by nature
+"scripts/*.py" = ["E501"]  # Sample data + sample prompts in dev scripts
+
 [tool.pyright]
-include = ["app", "tests"]
+include = ["app", "tests", "scripts"]
 typeCheckingMode = "strict"
 pythonVersion = "3.13"
 

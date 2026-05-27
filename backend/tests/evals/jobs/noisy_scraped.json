@@ -1,0 +1,11 @@
+{
+  "input": "[Skip to content] [Cookie settings]\nHome > Jobs > Engineering > Apply\n\nApply now    Save    Share\n\nSenior Backend Engineer\nKlarna  Stockholm  Hybrid\n\nAbout Klarna\nKlarna is reinventing how people shop and pay. We're hiring backend engineers to scale our checkout infrastructure.\n\nThe role\nYou'll join our checkout platform team. We use:\n- Java 21\n- Spring Boot\n- PostgreSQL\n- Kafka\n- Kubernetes on AWS\n\nYou'll work on:\n- Building APIs that handle 100k+ requests/second\n- Improving observability across our services\n- Mentoring junior engineers\n\nMust have:\n- 5+ years of Java backend experience\n- Production experience with distributed systems\n- Solid PostgreSQL skills\n\nBonus:\n- Kafka experience\n- Open source contributions\n\nSalary: SEK 850-1100k.\n\n[Subscribe to our newsletter]\n© 2026 Klarna AB    Privacy Policy    Terms of Service\nLinkedIn  Twitter  Instagram",
+  "expected": {
+    "title": "Senior Backend Engineer",
+    "company": "Klarna",
+    "remote_policy": "hybrid",
+    "seniority": "senior",
+    "tech_stack_includes": ["java", "spring", "postgresql", "kafka", "kubernetes", "aws"],
+    "min_requirements": 6
+  }
+}

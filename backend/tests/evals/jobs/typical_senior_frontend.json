@@ -1,0 +1,11 @@
+{
+  "input": "Senior Frontend Engineer at Vercel (Berlin / hybrid)\n\nAbout us\nVercel is the frontend cloud platform behind Next.js. We're hiring across product and infrastructure.\n\nTech stack:\n- TypeScript\n- Next.js\n- React\n- Tailwind CSS\n- tRPC\n- PostgreSQL\n\nWhat you'll do:\n- Own a slice of the dashboard from design to production\n- Mentor 1-2 mid-level engineers\n- Drive performance work across the frontend\n\nRequirements:\n- 6+ years building React apps in production\n- Strong TypeScript fundamentals\n- Experience leading technical projects\n\nNice to have:\n- Open source contributions\n- Experience with Next.js App Router\n\nCompensation: €90-115k base.",
+  "expected": {
+    "title": "Senior Frontend Engineer",
+    "company": "Vercel",
+    "remote_policy": "hybrid",
+    "seniority": "senior",
+    "tech_stack_includes": ["typescript", "next.js", "react", "tailwind", "trpc", "postgresql"],
+    "min_requirements": 6
+  }
+}

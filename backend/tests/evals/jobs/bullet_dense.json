@@ -1,0 +1,10 @@
+{
+  "input": "Staff Backend Engineer at Loom\n\nStack: Go, gRPC, PostgreSQL, Redis, GCP, Kubernetes.\n\nWhat you'll do:\n- Lead architectural decisions for our video processing pipeline\n- Mentor a team of 4-5 backend engineers\n- Drive technical roadmap for the platform team\n- Partner with product on capacity planning\n- Own end-to-end performance work\n\nRequired experience:\n- 8+ years of backend engineering\n- 3+ years working with Go in production\n- Experience leading distributed teams\n- Strong system design fundamentals\n- Track record of mentoring senior engineers\n- Comfort with gRPC service design\n- Production PostgreSQL at significant scale\n\nNice to have:\n- Video / streaming infrastructure background\n- Experience with GCP specifically\n- Open source maintainership\n\nComp: $190-240k base + equity. Remote within US/Canada/UK.",
+  "expected": {
+    "title": "Staff Backend Engineer",
+    "company": "Loom",
+    "remote_policy": "remote",
+    "tech_stack_includes": ["go", "grpc", "postgresql", "redis", "gcp", "kubernetes"],
+    "min_requirements": 12
+  }
+}

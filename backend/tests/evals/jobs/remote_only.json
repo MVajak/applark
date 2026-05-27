@@ -1,0 +1,11 @@
+{
+  "input": "Senior Full-Stack Engineer at Doist\n\nDoist makes Todoist and Twist. We've been fully remote since 2008 with team members across 30+ countries. We care about deep work, async communication, and trusting people to do their best work without surveillance.\n\nWhat we use:\n- TypeScript\n- React Native\n- Node.js\n- PostgreSQL\n- AWS\n\nThe role\nYou'll work across our mobile and web stack. We hire generalists who can move comfortably between platforms. We care more about how you think than how many years you've been at it.\n\nYou'll be responsible for:\n- Shipping product features end-to-end\n- Reviewing peer code with care and patience\n- Writing docs that explain decisions to your future teammates\n\nYou'll need:\n- 5+ years shipping production apps in TypeScript\n- Comfort across web and mobile (React Native is a plus, not required)\n- Strong written communication — async is how we work\n\nNice to have:\n- Background working with PostgreSQL at scale\n- Open source side projects\n- Past remote-only experience\n\nSalary: $110-145k USD globally consistent.",
+  "expected": {
+    "title": "Senior Full-Stack Engineer",
+    "company": "Doist",
+    "remote_policy": "remote",
+    "seniority": "senior",
+    "tech_stack_includes": ["typescript", "react-native", "node.js", "postgresql", "aws"],
+    "min_requirements": 6
+  }
+}

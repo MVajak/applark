@@ -9,6 +9,22 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import settings
 from app.core.database import Base
+from app.modules.cover_letters import (
+    models as _cover_letters_models,  # noqa: F401  # register models for autogenerate
+)
+from app.modules.cv import models as _cv_models  # noqa: F401  # register models for autogenerate
+from app.modules.cv_tailor import (
+    models as _cv_tailor_models,  # noqa: F401  # register models for autogenerate
+)
+from app.modules.interview_prep import (
+    models as _interview_prep_models,  # noqa: F401  # register models for autogenerate
+)
+from app.modules.jobs import (
+    models as _jobs_models,  # noqa: F401  # register models for autogenerate
+)
+from app.modules.matching import (
+    models as _matching_models,  # noqa: F401  # register models for autogenerate
+)
 
 config = context.config
 

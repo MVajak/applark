@@ -1,0 +1,12 @@
+{
+  "input": "Senior Site Reliability Engineer\nFully remote within EU\n\nWe're a stealth-mode startup in the climate tech space. Looking for an experienced SRE to be one of our first engineering hires.\n\nStack:\n- Go\n- Kubernetes\n- Terraform\n- PostgreSQL\n- Prometheus + Grafana\n\nRequirements:\n- 6+ years operating production systems\n- Deep Kubernetes experience\n- Comfortable with terraform and cloud cost optimisation\n\nWhat you'll do:\n- Build out our SRE practice from scratch\n- Define our SLOs and oncall rotations\n- Mentor backend engineers on operational concerns\n\nCompensation: TBD based on candidate.",
+  "expected": {
+    "title": "Senior Site Reliability Engineer",
+    "company": null,
+    "remote_policy": "remote",
+    "seniority": "senior",
+    "tech_stack_includes": ["go", "kubernetes", "terraform", "postgresql", "prometheus", "grafana"],
+    "salary_range": null,
+    "min_requirements": 6
+  }
+}

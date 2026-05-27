@@ -1,10 +1,12 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 
 from app.core.database import SessionLocal
+from app.core.http import conflict_on
 from app.modules.interview_prep import repository, service
 from app.modules.interview_prep.schemas import InterviewPrepRunRead
+from app.modules.shared.feature_context import FeaturePrerequisitesError, NoMatchRunError
 
 router = APIRouter(prefix="/interview-prep", tags=["interview_prep"])
 
@@ -13,16 +15,8 @@ router = APIRouter(prefix="/interview-prep", tags=["interview_prep"])
 async def generate_interview_prep(job_id: uuid.UUID) -> InterviewPrepRunRead:
     """Generate interview prep synchronously (~5-10s for one Sonnet call)."""
     async with SessionLocal() as session:
-        try:
+        with conflict_on(NoMatchRunError, FeaturePrerequisitesError):
             run = await service.generate_interview_prep(session, job_id)
-        except service.NoMatchRunError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
-        except service.InterviewPrepPrerequisitesError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
 
         await session.commit()
         return InterviewPrepRunRead.model_validate(run)

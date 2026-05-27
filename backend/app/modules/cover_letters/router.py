@@ -1,10 +1,12 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 
 from app.core.database import SessionLocal
+from app.core.http import conflict_on
 from app.modules.cover_letters import repository, service
 from app.modules.cover_letters.schemas import CoverLetterDraftRead
+from app.modules.shared.feature_context import FeaturePrerequisitesError, NoMatchRunError
 
 router = APIRouter(prefix="/cover-letters", tags=["cover_letters"])
 
@@ -17,16 +19,8 @@ router = APIRouter(prefix="/cover-letters", tags=["cover_letters"])
 async def generate_cover_letter_for_job(job_id: uuid.UUID) -> CoverLetterDraftRead:
     """Draft a cover letter using the latest match run + CV chunks."""
     async with SessionLocal() as session:
-        try:
+        with conflict_on(NoMatchRunError, FeaturePrerequisitesError):
             draft = await service.generate_cover_letter(session, job_id)
-        except service.NoMatchRunError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
-        except service.CoverLetterPrerequisitesError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
 
         await session.commit()
         return CoverLetterDraftRead.model_validate(draft)

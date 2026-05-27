@@ -2,57 +2,22 @@
 
 import json
 import uuid
-from typing import Any
 
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core import providers
 from app.core.llm import LLM_MODEL_SMART, extract_token_usage
-from app.modules.cv.models import CVChunk
-from app.modules.cv.protocols import CVProvider
-from app.modules.cv.schemas import CVDocumentKind
 from app.modules.interview_prep import repository as interview_prep_repository
 from app.modules.interview_prep.agent import interview_prep_agent
 from app.modules.interview_prep.models import InterviewPrepRun
-from app.modules.jobs.protocols import JobProvider
-from app.modules.jobs.schemas import JobStatus
-from app.modules.matching.protocols import MatchingProvider
 from app.modules.matching.schemas import MatchExplanation
+from app.modules.shared.feature_context import (
+    build_job_dict,
+    chunk_for_prompt,
+    gather_match_feature_context,
+)
 
 logger = structlog.get_logger(__name__)
-
-
-class NoMatchRunError(RuntimeError):
-    """Interview prep requires a prior MatchRun; none exists."""
-
-
-class InterviewPrepPrerequisitesError(RuntimeError):
-    """Job isn't ready, no CV uploaded, or CV has no chunks."""
-
-
-def _build_job_dict(job: Any) -> dict[str, Any]:
-    return {
-        "title": job.title,
-        "company": job.company,
-        "location": job.location,
-        "remote_policy": job.remote_policy.value,
-        "seniority": job.seniority.value,
-        "tech_stack": list(job.tech_stack),
-        "summary": job.summary,
-        "requirements": [
-            {"text": req.text, "category": req.category.value} for req in job.requirements
-        ],
-    }
-
-
-def _chunk_for_prompt(chunk: CVChunk) -> dict[str, Any]:
-    return {
-        "id": str(chunk.id),
-        "content": chunk.content,
-        "chunk_type": chunk.chunk_type.value,
-        "metadata": chunk.metadata_,
-    }
 
 
 async def generate_interview_prep(session: AsyncSession, job_id: uuid.UUID) -> InterviewPrepRun:
@@ -61,35 +26,18 @@ async def generate_interview_prep(session: AsyncSession, job_id: uuid.UUID) -> I
     The agent gets ALL CV chunks (not a top-k subset) because any chunk
     might be the right anchor for a question's suggested_angle.
     """
-    job = await providers.get(JobProvider).get_job_with_requirements(session, job_id)
-    if job is None:
-        raise InterviewPrepPrerequisitesError(f"Job {job_id} not found")
-    if job.status != JobStatus.ready:
-        raise InterviewPrepPrerequisitesError(
-            f"Job status is '{job.status.value}'; interview prep needs 'ready'."
-        )
-
-    match_run = await providers.get(MatchingProvider).get_latest_for_job(session, job_id)
-    if match_run is None:
-        raise NoMatchRunError("Run match against your CV before generating interview prep.")
-
-    cv_doc = await providers.get(CVProvider).get_latest_document_with_chunks(
-        session, kind=CVDocumentKind.cv
+    ctx = await gather_match_feature_context(
+        session,
+        job_id,
+        needs_ready_subject="interview prep",
+        no_match_action="generating interview prep",
     )
-    if cv_doc is None:
-        raise InterviewPrepPrerequisitesError(
-            "No CV uploaded yet — upload one via POST /api/v1/cv/documents."
-        )
-    if not cv_doc.chunks:
-        raise InterviewPrepPrerequisitesError(
-            f"CV {cv_doc.id} has no chunks — chunking may not have completed."
-        )
 
-    explanation = MatchExplanation.model_validate(match_run.details)
+    explanation = MatchExplanation.model_validate(ctx.match_run.details)
 
-    job_dict = _build_job_dict(job)
+    job_dict = build_job_dict(ctx.job)
     match_dict = explanation.model_dump(mode="json")
-    chunks_list = [_chunk_for_prompt(c) for c in cv_doc.chunks]
+    chunks_list = [chunk_for_prompt(c) for c in ctx.cv_doc.chunks]
 
     user_prompt = f"""<job>{json.dumps(job_dict)}</job>
 
@@ -107,7 +55,7 @@ referenced_cv_chunk_ids when the candidate has relevant experience for a questio
     logger.info(
         "interview_prep_done",
         job_id=str(job_id),
-        match_run_id=str(match_run.id),
+        match_run_id=str(ctx.match_run.id),
         questions=len(output.questions),
         areas_of_focus=len(output.likely_areas_of_focus),
         questions_to_ask=len(output.questions_to_ask_them),

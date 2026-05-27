@@ -1,10 +1,12 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 
 from app.core.database import SessionLocal
+from app.core.http import conflict_on
 from app.modules.cv_tailor import repository, service
 from app.modules.cv_tailor.schemas import CVTailorRunRead
+from app.modules.shared.feature_context import FeaturePrerequisitesError, NoMatchRunError
 
 router = APIRouter(prefix="/cv-tailor", tags=["cv_tailor"])
 
@@ -13,16 +15,8 @@ router = APIRouter(prefix="/cv-tailor", tags=["cv_tailor"])
 async def run_cv_tailor(job_id: uuid.UUID) -> CVTailorRunRead:
     """Run the tailor agent synchronously (~5-10s for one Sonnet call)."""
     async with SessionLocal() as session:
-        try:
+        with conflict_on(NoMatchRunError, FeaturePrerequisitesError):
             run = await service.run_cv_tailor(session, job_id)
-        except service.NoMatchRunError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
-        except service.CVTailorPrerequisitesError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
 
         await session.commit()
         return CVTailorRunRead.model_validate(run)

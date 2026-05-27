@@ -3,6 +3,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, status
 
 from app.core.database import SessionLocal
+from app.core.http import conflict_on
 from app.modules.jobs import repository as jobs_repository
 from app.modules.jobs.schemas import JobStatus
 from app.modules.matching import repository
@@ -36,16 +37,8 @@ async def run_match_for_job(job_id: uuid.UUID) -> MatchRunRead:
                 ),
             )
 
-        try:
+        with conflict_on(NoCVUploadedError, MissingEmbeddingsError):
             run = await run_match(session, job_id)
-        except NoCVUploadedError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
-        except MissingEmbeddingsError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-            ) from exc
 
         await session.commit()
         return MatchRunRead.model_validate(run)

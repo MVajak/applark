@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.core import providers
-from app.core.llm import LLM_MODEL_SMART
+from app.core.llm import LLM_MODEL_SMART, extract_token_usage
 from app.modules.cv.models import CVChunk, CVDocument
 from app.modules.cv.protocols import CVProvider
 from app.modules.cv.schemas import CVDocumentKind
@@ -69,9 +69,7 @@ async def find_latest_cv(session: AsyncSession) -> CVDocument:
         session, kind=CVDocumentKind.cv
     )
     if doc is None:
-        raise NoCVUploadedError(
-            "No CV uploaded yet — POST /api/v1/cv/documents first."
-        )
+        raise NoCVUploadedError("No CV uploaded yet — POST /api/v1/cv/documents first.")
     return doc
 
 
@@ -107,9 +105,7 @@ async def _top_chunks_by_embedding(
     ]
 
 
-async def build_match_context(
-    session: AsyncSession, job_id: uuid.UUID
-) -> MatchContext:
+async def build_match_context(session: AsyncSession, job_id: uuid.UUID) -> MatchContext:
     """Run all deterministic vector search and assemble the agent's input."""
     job = await providers.get(JobProvider).get_job_with_requirements(session, job_id)
     if job is None:
@@ -126,9 +122,7 @@ async def build_match_context(
         )
     missing = [c for c in cv_doc.chunks if c.embedding is None]
     if missing:
-        raise MissingEmbeddingsError(
-            f"CV {cv_doc.id} has {len(missing)} chunks without embeddings"
-        )
+        raise MissingEmbeddingsError(f"CV {cv_doc.id} has {len(missing)} chunks without embeddings")
 
     requirement_matches: list[RequirementMatch] = []
     for req in job.requirements:
@@ -190,13 +184,7 @@ Now produce a MatchExplanation per the rules in the system prompt."""
 
     result = await match_explainer.run(user_prompt)
     explanation = result.output
-    usage = result.usage()
-    input_tokens = getattr(usage, "input_tokens", None) or getattr(
-        usage, "request_tokens", None
-    )
-    output_tokens = getattr(usage, "output_tokens", None) or getattr(
-        usage, "response_tokens", None
-    )
+    input_tokens, output_tokens = extract_token_usage(result.usage())
 
     logger.info(
         "match_run_done",

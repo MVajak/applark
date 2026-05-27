@@ -8,7 +8,7 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import providers
-from app.core.llm import LLM_MODEL_SMART
+from app.core.llm import LLM_MODEL_SMART, extract_token_usage
 from app.modules.cv.models import CVChunk
 from app.modules.cv.protocols import CVProvider
 from app.modules.cv.schemas import CVDocumentKind
@@ -41,8 +41,7 @@ def _build_job_dict(job: Any) -> dict[str, Any]:
         "tech_stack": list(job.tech_stack),
         "summary": job.summary,
         "requirements": [
-            {"text": req.text, "category": req.category.value}
-            for req in job.requirements
+            {"text": req.text, "category": req.category.value} for req in job.requirements
         ],
     }
 
@@ -56,9 +55,7 @@ def _chunk_for_prompt(chunk: CVChunk) -> dict[str, Any]:
     }
 
 
-async def generate_interview_prep(
-    session: AsyncSession, job_id: uuid.UUID
-) -> InterviewPrepRun:
+async def generate_interview_prep(session: AsyncSession, job_id: uuid.UUID) -> InterviewPrepRun:
     """Generate interview prep and persist it. Caller commits.
 
     The agent gets ALL CV chunks (not a top-k subset) because any chunk
@@ -74,9 +71,7 @@ async def generate_interview_prep(
 
     match_run = await providers.get(MatchingProvider).get_latest_for_job(session, job_id)
     if match_run is None:
-        raise NoMatchRunError(
-            "Run match against your CV before generating interview prep."
-        )
+        raise NoMatchRunError("Run match against your CV before generating interview prep.")
 
     cv_doc = await providers.get(CVProvider).get_latest_document_with_chunks(
         session, kind=CVDocumentKind.cv
@@ -107,13 +102,7 @@ referenced_cv_chunk_ids when the candidate has relevant experience for a questio
 
     result = await interview_prep_agent.run(user_prompt)
     output = result.output
-    usage = result.usage()
-    input_tokens = getattr(usage, "input_tokens", None) or getattr(
-        usage, "request_tokens", None
-    )
-    output_tokens = getattr(usage, "output_tokens", None) or getattr(
-        usage, "response_tokens", None
-    )
+    input_tokens, output_tokens = extract_token_usage(result.usage())
 
     logger.info(
         "interview_prep_done",

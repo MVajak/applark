@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.embeddings import get_embedding, get_embeddings
+from app.core.llm import extract_token_usage
 from app.modules.jobs import repository
 from app.modules.jobs.agent import job_extractor
 from app.modules.jobs.models import JobRequirement
@@ -35,12 +36,10 @@ async def run_job_extraction(
         "Extract the structured fields per the rules above."
     )
     result = await job_extractor.run(user_message)
-    usage = result.usage()
+    input_tokens, output_tokens = extract_token_usage(result.usage())
     usage_dict: dict[str, int | None] = {
-        "input_tokens": getattr(usage, "input_tokens", None)
-        or getattr(usage, "request_tokens", None),
-        "output_tokens": getattr(usage, "output_tokens", None)
-        or getattr(usage, "response_tokens", None),
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
     }
     logger.info(
         "job_extraction_done",

@@ -8,7 +8,7 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import providers
-from app.core.llm import LLM_MODEL_SMART
+from app.core.llm import LLM_MODEL_SMART, extract_token_usage
 from app.modules.cv.models import CVChunk
 from app.modules.cv.protocols import CVProvider
 from app.modules.cv.schemas import CVDocumentKind
@@ -41,8 +41,7 @@ def _build_job_dict(job: Any) -> dict[str, Any]:
         "tech_stack": list(job.tech_stack),
         "summary": job.summary,
         "requirements": [
-            {"text": req.text, "category": req.category.value}
-            for req in job.requirements
+            {"text": req.text, "category": req.category.value} for req in job.requirements
         ],
     }
 
@@ -56,9 +55,7 @@ def _chunk_for_prompt(chunk: CVChunk) -> dict[str, Any]:
     }
 
 
-async def run_cv_tailor(
-    session: AsyncSession, job_id: uuid.UUID
-) -> CVTailorRun:
+async def run_cv_tailor(session: AsyncSession, job_id: uuid.UUID) -> CVTailorRun:
     """Run the tailor agent and persist the result. Caller commits.
 
     Unlike the cover-letter flow, the agent is given the full CV chunk list
@@ -75,9 +72,7 @@ async def run_cv_tailor(
 
     match_run = await providers.get(MatchingProvider).get_latest_for_job(session, job_id)
     if match_run is None:
-        raise NoMatchRunError(
-            "Run match against your CV before requesting tailor suggestions."
-        )
+        raise NoMatchRunError("Run match against your CV before requesting tailor suggestions.")
 
     cv_doc = await providers.get(CVProvider).get_latest_document_with_chunks(
         session, kind=CVDocumentKind.cv
@@ -109,13 +104,7 @@ Produce CV tailor suggestions per the rules above. Reference chunks by their UUI
 
     result = await cv_tailor.run(user_prompt)
     output = result.output
-    usage = result.usage()
-    input_tokens = getattr(usage, "input_tokens", None) or getattr(
-        usage, "request_tokens", None
-    )
-    output_tokens = getattr(usage, "output_tokens", None) or getattr(
-        usage, "response_tokens", None
-    )
+    input_tokens, output_tokens = extract_token_usage(result.usage())
 
     logger.info(
         "cv_tailor_run_done",

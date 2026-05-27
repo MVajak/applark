@@ -8,7 +8,7 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import providers
-from app.core.llm import LLM_MODEL_SMART
+from app.core.llm import LLM_MODEL_SMART, extract_token_usage
 from app.modules.cover_letters import repository as cover_letters_repository
 from app.modules.cover_letters.agent import cover_letter_drafter
 from app.modules.cover_letters.models import CoverLetterDraft as CoverLetterDraftRow
@@ -45,8 +45,7 @@ def _build_job_dict(job: Any) -> dict[str, Any]:
         "tech_stack": list(job.tech_stack),
         "summary": job.summary,
         "requirements": [
-            {"text": req.text, "category": req.category.value}
-            for req in job.requirements
+            {"text": req.text, "category": req.category.value} for req in job.requirements
         ],
     }
 
@@ -60,25 +59,19 @@ def _chunk_for_prompt(chunk: CVChunk) -> dict[str, Any]:
     }
 
 
-def _select_chunks(
-    chunks: list[CVChunk], strength_ids: set[uuid.UUID]
-) -> list[CVChunk]:
+def _select_chunks(chunks: list[CVChunk], strength_ids: set[uuid.UUID]) -> list[CVChunk]:
     """Pick chunks the agent should see: strengths first, then summary, capped."""
     selected: list[CVChunk] = [c for c in chunks if c.id in strength_ids]
     already = {c.id for c in selected}
 
-    summary_chunk = next(
-        (c for c in chunks if c.chunk_type == CVChunkType.summary), None
-    )
+    summary_chunk = next((c for c in chunks if c.chunk_type == CVChunkType.summary), None)
     if summary_chunk is not None and summary_chunk.id not in already:
         selected.append(summary_chunk)
 
     return selected[:MAX_CHUNKS_PER_DRAFT]
 
 
-async def generate_cover_letter(
-    session: AsyncSession, job_id: uuid.UUID
-) -> CoverLetterDraftRow:
+async def generate_cover_letter(session: AsyncSession, job_id: uuid.UUID) -> CoverLetterDraftRow:
     """Draft a cover letter using the job, the latest match run, and the CV.
 
     Persists a :class:`CoverLetterDraft` row and returns it. Caller owns
@@ -94,9 +87,7 @@ async def generate_cover_letter(
 
     match_run = await providers.get(MatchingProvider).get_latest_for_job(session, job_id)
     if match_run is None:
-        raise NoMatchRunError(
-            "Run match against your CV before generating a cover letter."
-        )
+        raise NoMatchRunError("Run match against your CV before generating a cover letter.")
 
     cv_doc = await providers.get(CVProvider).get_latest_document_with_chunks(
         session, kind=CVDocumentKind.cv
@@ -130,13 +121,7 @@ Draft the cover letter per the rules in the system prompt."""
 
     result = await cover_letter_drafter.run(user_prompt)
     draft = result.output
-    usage = result.usage()
-    input_tokens = getattr(usage, "input_tokens", None) or getattr(
-        usage, "request_tokens", None
-    )
-    output_tokens = getattr(usage, "output_tokens", None) or getattr(
-        usage, "response_tokens", None
-    )
+    input_tokens, output_tokens = extract_token_usage(result.usage())
 
     word_count = len(draft.body.split())
     logger.info(

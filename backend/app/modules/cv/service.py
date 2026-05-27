@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.embeddings import get_embeddings
+from app.core.llm import extract_token_usage
 from app.modules.cv import repository
 from app.modules.cv.agent import cv_extractor
 from app.modules.cv.models import CVChunk
@@ -28,18 +29,13 @@ async def run_cv_extraction(raw_text: str) -> CVExtraction:
         )
         raw_text = raw_text[:MAX_RAW_TEXT_CHARS]
 
-    user_message = (
-        f"<cv>\n{raw_text}\n</cv>\n\n"
-        "Extract structured chunks per the rules above."
-    )
+    user_message = f"<cv>\n{raw_text}\n</cv>\n\nExtract structured chunks per the rules above."
     result = await cv_extractor.run(user_message)
-    usage = result.usage()
+    input_tokens, output_tokens = extract_token_usage(result.usage())
     logger.info(
         "cv_extraction_done",
-        input_tokens=getattr(usage, "input_tokens", None)
-        or getattr(usage, "request_tokens", None),
-        output_tokens=getattr(usage, "output_tokens", None)
-        or getattr(usage, "response_tokens", None),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
         chunks=len(result.output.chunks),
         candidate_name=result.output.candidate_name,
     )
@@ -62,9 +58,7 @@ async def persist_cv_chunks(
     # has nothing to map to a "Proficiency in Estonian/English" requirement.
     # Synthesise one if absent.
     languages = [lang.lower() for lang in extraction.languages_spoken]
-    has_language_chunk = any(
-        c.chunk_type == CVChunkType.language for c in extraction.chunks
-    )
+    has_language_chunk = any(c.chunk_type == CVChunkType.language for c in extraction.chunks)
     if languages and not has_language_chunk:
         extraction.chunks.append(
             ExtractedCVChunk(

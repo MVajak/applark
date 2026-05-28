@@ -6,15 +6,9 @@ from redis.asyncio import Redis
 
 from app.core.database import SessionLocal
 from app.core.events import EVENTS_JOBS, publish
-from app.modules.jobs import repository
+from app.modules.jobs import service as jobs_service
 from app.modules.jobs.events import JobStatusEvent
 from app.modules.jobs.schemas import JobStatus
-from app.modules.jobs.scraper import scrape_job_posting
-from app.modules.jobs.service import (
-    mark_job_failed,
-    persist_job_extraction,
-    run_job_extraction,
-)
 
 logger = structlog.get_logger(__name__)
 
@@ -54,22 +48,14 @@ async def extract_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
 
     try:
         async with SessionLocal() as session:
-            job = await repository.get_job(session, job_uuid)
-            if job is None:
-                raise RuntimeError(f"Job {job_uuid} not found")
-            job.status = JobStatus.extracting
-            job.error_message = None
-            raw_text = job.raw_text
+            raw_text = await jobs_service.begin_extraction(session, job_uuid)
             await session.commit()
         await _emit(ctx, job_uuid, JobStatus.extracting)
 
-        extraction, usage = await run_job_extraction(raw_text)
+        extraction, usage = await jobs_service.run_job_extraction(raw_text)
 
         async with SessionLocal() as session:
-            await persist_job_extraction(session, job_uuid, extraction)
-            job = await repository.get_job(session, job_uuid)
-            if job is not None:
-                job.status = JobStatus.ready
+            await jobs_service.persist_job_extraction(session, job_uuid, extraction)
             await session.commit()
         await _emit(ctx, job_uuid, JobStatus.ready)
 
@@ -87,7 +73,7 @@ async def extract_job(ctx: dict[str, Any], job_id: str) -> dict[str, Any]:
         }
     except Exception as exc:
         logger.exception("extract_job_failed", job_id=job_id)
-        await mark_job_failed(job_uuid, str(exc))
+        await jobs_service.mark_job_failed(job_uuid, str(exc))
         await _emit(ctx, job_uuid, JobStatus.failed, str(exc))
         raise
 
@@ -108,35 +94,21 @@ async def scrape_and_extract_job(ctx: dict[str, Any], job_id: str) -> dict[str, 
 
     try:
         async with SessionLocal() as session:
-            job = await repository.get_job(session, job_uuid)
-            if job is None:
-                raise RuntimeError(f"Job {job_uuid} not found")
-            if not job.source_url:
-                raise RuntimeError(f"Job {job_uuid} has no source_url")
-            url = job.source_url
-            job.status = JobStatus.scraping
-            job.error_message = None
+            url = await jobs_service.begin_scrape(session, job_uuid)
             await session.commit()
         await _emit(ctx, job_uuid, JobStatus.scraping)
 
-        raw_text = await scrape_job_posting(url)
+        raw_text = await jobs_service.scrape_job(url)
 
         async with SessionLocal() as session:
-            job = await repository.get_job(session, job_uuid)
-            if job is None:
-                raise RuntimeError(f"Job {job_uuid} not found after scrape")
-            job.raw_text = raw_text
-            job.status = JobStatus.extracting
+            await jobs_service.persist_scraped_text(session, job_uuid, raw_text)
             await session.commit()
         await _emit(ctx, job_uuid, JobStatus.extracting)
 
-        extraction, usage = await run_job_extraction(raw_text)
+        extraction, usage = await jobs_service.run_job_extraction(raw_text)
 
         async with SessionLocal() as session:
-            await persist_job_extraction(session, job_uuid, extraction)
-            job = await repository.get_job(session, job_uuid)
-            if job is not None:
-                job.status = JobStatus.ready
+            await jobs_service.persist_job_extraction(session, job_uuid, extraction)
             await session.commit()
         await _emit(ctx, job_uuid, JobStatus.ready)
 
@@ -156,6 +128,6 @@ async def scrape_and_extract_job(ctx: dict[str, Any], job_id: str) -> dict[str, 
         }
     except Exception as exc:
         logger.exception("scrape_and_extract_job_failed", job_id=job_id)
-        await mark_job_failed(job_uuid, str(exc))
+        await jobs_service.mark_job_failed(job_uuid, str(exc))
         await _emit(ctx, job_uuid, JobStatus.failed, str(exc))
         raise

@@ -75,3 +75,7 @@ Produce CV tailor suggestions per the rules above. Reference chunks by their UUI
         input_tokens=input_tokens,
         output_tokens=output_tokens,
     )
+
+
+async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> CVTailorRun | None:
+    return await cv_tailor_repository.get_latest_for_job(session, job_id)

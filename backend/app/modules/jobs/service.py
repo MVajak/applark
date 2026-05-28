@@ -1,4 +1,5 @@
 import uuid
+from collections.abc import Sequence
 
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,10 +10,30 @@ from app.core.embeddings import get_embedding, get_embeddings
 from app.core.llm import extract_token_usage
 from app.modules.jobs import repository
 from app.modules.jobs.agent import job_extractor
-from app.modules.jobs.models import JobRequirement
-from app.modules.jobs.schemas import JobExtraction, JobStatus
+from app.modules.jobs.models import Job, JobRequirement
+from app.modules.jobs.schemas import (
+    CreateJobFromText,
+    CreateJobFromUrl,
+    JobExtraction,
+    JobSourceKind,
+    JobStatus,
+)
+from app.modules.jobs.scraper import scrape_job_posting
 
 logger = structlog.get_logger(__name__)
+
+
+class DuplicateJobError(RuntimeError):
+    """A job already exists for the given source_url."""
+
+    def __init__(self, existing_id: uuid.UUID) -> None:
+        super().__init__(f"Job already exists for that source_url (id={existing_id})")
+        self.existing_id = existing_id
+
+
+class JobNotRetriableError(RuntimeError):
+    """Retry was requested for a job that isn't in the 'failed' state."""
+
 
 # Hard cap so a pathologically long scrape (cookie banners, embedded
 # transcripts, etc.) can't blow up our per-call Anthropic cost.
@@ -57,7 +78,7 @@ async def persist_job_extraction(
     job_id: uuid.UUID,
     extraction: JobExtraction,
 ) -> None:
-    """Update job fields, embed the summary, replace requirements.
+    """Update job fields, embed the summary, replace requirements, mark ready.
 
     Idempotent on retry: any existing requirements are deleted before the
     new set is inserted. Caller owns the transaction.
@@ -99,6 +120,8 @@ async def persist_job_extraction(
         ]
         await repository.add_requirements(session, requirements)
 
+    job.status = JobStatus.ready
+
 
 async def mark_job_failed(job_id: uuid.UUID, error_message: str) -> None:
     """Set job.status='failed' and persist error_message. Opens its own session.
@@ -113,3 +136,113 @@ async def mark_job_failed(job_id: uuid.UUID, error_message: str) -> None:
         job.status = JobStatus.failed
         job.error_message = error_message
         await session.commit()
+
+
+# ----- CRUD + creation (router-facing; caller owns the transaction) -----
+
+
+async def _ensure_url_unique(session: AsyncSession, url: str | None) -> None:
+    """Raise :class:`DuplicateJobError` if a job already exists for ``url``."""
+    if url is None:
+        return
+    existing = await repository.get_by_url(session, url)
+    if existing is not None:
+        raise DuplicateJobError(existing.id)
+
+
+async def create_job_from_text(session: AsyncSession, payload: CreateJobFromText) -> Job:
+    """Persist a pasted-text job in 'pending'. Caller commits + enqueues extraction."""
+    await _ensure_url_unique(session, payload.source_url)
+    job = Job(
+        source_kind=JobSourceKind.pasted,
+        raw_text=payload.raw_text,
+        source_url=payload.source_url,
+        status=JobStatus.pending,
+    )
+    return await repository.add_job(session, job)
+
+
+async def create_job_from_url(session: AsyncSession, payload: CreateJobFromUrl) -> Job:
+    """Persist a URL-source job in 'pending'. Caller commits + enqueues scrape."""
+    url = str(payload.source_url)
+    await _ensure_url_unique(session, url)
+    job = Job(
+        source_kind=JobSourceKind.url,
+        source_url=url,
+        raw_text="",
+        status=JobStatus.pending,
+    )
+    return await repository.add_job(session, job)
+
+
+async def list_jobs(
+    session: AsyncSession,
+    *,
+    status: JobStatus | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> Sequence[Job]:
+    return await repository.list_jobs(session, status=status, limit=limit, offset=offset)
+
+
+async def get_job_with_requirements(session: AsyncSession, job_id: uuid.UUID) -> Job | None:
+    """Cross-module read backing :class:`~app.modules.jobs.protocols.JobProvider`."""
+    return await repository.get_job_with_requirements(session, job_id)
+
+
+async def delete_job(session: AsyncSession, job_id: uuid.UUID) -> bool:
+    return await repository.delete_job(session, job_id)
+
+
+async def mark_for_retry(session: AsyncSession, job: Job) -> str:
+    """Flip a failed job back to 'pending' and return the task name to enqueue.
+
+    Raises :class:`JobNotRetriableError` unless the job is currently 'failed'.
+    Caller commits.
+    """
+    if job.status != JobStatus.failed:
+        raise JobNotRetriableError(
+            f"Job status is '{job.status.value}'; only 'failed' jobs can be retried"
+        )
+    job.status = JobStatus.pending
+    job.error_message = None
+    return "scrape_and_extract_job" if job.source_kind == JobSourceKind.url else "extract_job"
+
+
+# ----- Task-phase transitions (worker-facing; caller owns the transaction) -----
+
+
+async def begin_extraction(session: AsyncSession, job_id: uuid.UUID) -> str:
+    """Mark 'extracting', clear the error, and return the job's raw_text."""
+    job = await repository.get_job(session, job_id)
+    if job is None:
+        raise RuntimeError(f"Job {job_id} not found")
+    job.status = JobStatus.extracting
+    job.error_message = None
+    return job.raw_text
+
+
+async def begin_scrape(session: AsyncSession, job_id: uuid.UUID) -> str:
+    """Mark 'scraping', clear the error, and return the job's source_url."""
+    job = await repository.get_job(session, job_id)
+    if job is None:
+        raise RuntimeError(f"Job {job_id} not found")
+    if not job.source_url:
+        raise RuntimeError(f"Job {job_id} has no source_url")
+    job.status = JobStatus.scraping
+    job.error_message = None
+    return job.source_url
+
+
+async def scrape_job(url: str) -> str:
+    """Headless-browser scrape of a job posting (no DB)."""
+    return await scrape_job_posting(url)
+
+
+async def persist_scraped_text(session: AsyncSession, job_id: uuid.UUID, raw_text: str) -> None:
+    """Store scraped raw_text and advance the job to 'extracting'."""
+    job = await repository.get_job(session, job_id)
+    if job is None:
+        raise RuntimeError(f"Job {job_id} not found after scrape")
+    job.raw_text = raw_text
+    job.status = JobStatus.extracting

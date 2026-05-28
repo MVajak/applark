@@ -12,19 +12,20 @@ from redis.asyncio import Redis
 from app.api.v1.router import router as v1_router
 from app.core import providers
 from app.core.config import settings
-from app.modules.cv import repository as cv_repository
+from app.modules.cv import service as cv_service
 from app.modules.cv.protocols import CVProvider
-from app.modules.jobs import repository as jobs_repository
+from app.modules.jobs import service as jobs_service
 from app.modules.jobs.protocols import JobProvider
-from app.modules.matching import repository as matching_repository
+from app.modules.matching import service as matching_service
 from app.modules.matching.protocols import MatchingProvider
 
-# Bind each domain's repository to its cross-module Protocol. Cross-module
+# Bind each domain's service to its cross-module Protocol. Cross-module
 # consumers resolve via `providers.get(SomeProvider)` instead of importing
-# the repository directly. Tests can re-register with fakes.
-providers.register(CVProvider, cv_repository)
-providers.register(JobProvider, jobs_repository)
-providers.register(MatchingProvider, matching_repository)
+# the service directly — and never reach another module's repository. Tests
+# can re-register with fakes.
+providers.register(CVProvider, cv_service)
+providers.register(JobProvider, jobs_service)
+providers.register(MatchingProvider, matching_service)
 
 
 @asynccontextmanager

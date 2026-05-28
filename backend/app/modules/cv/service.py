@@ -9,8 +9,14 @@ from app.core.embeddings import get_embeddings
 from app.core.llm import extract_token_usage
 from app.modules.cv import repository
 from app.modules.cv.agent import cv_extractor
-from app.modules.cv.models import CVChunk
-from app.modules.cv.schemas import CVChunkType, CVExtraction, ExtractedCVChunk
+from app.modules.cv.models import CVChunk, CVDocument
+from app.modules.cv.parser import extract_text_from_pdf
+from app.modules.cv.schemas import (
+    CVChunkType,
+    CVDocumentKind,
+    CVExtraction,
+    ExtractedCVChunk,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -86,3 +92,66 @@ async def persist_cv_chunks(
         )
     ]
     return await repository.add_chunks(session, chunks)
+
+
+# ----- Document CRUD (router-facing; caller owns the transaction) -----
+
+
+async def create_cv_document(
+    session: AsyncSession,
+    *,
+    file_bytes: bytes,
+    filename: str | None,
+    kind: CVDocumentKind,
+) -> CVDocument:
+    """Parse the uploaded PDF and persist a new CVDocument (no commit)."""
+    raw_text = extract_text_from_pdf(file_bytes)
+    document = CVDocument(kind=kind, filename=filename or "unnamed.pdf", raw_text=raw_text)
+    return await repository.add_document(session, document)
+
+
+async def list_documents(
+    session: AsyncSession,
+    *,
+    kind: CVDocumentKind | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> Sequence[CVDocument]:
+    return await repository.list_documents_with_chunks(
+        session, kind=kind, limit=limit, offset=offset
+    )
+
+
+async def get_document_with_chunks(
+    session: AsyncSession, document_id: uuid.UUID
+) -> CVDocument | None:
+    return await repository.get_document_with_chunks(session, document_id)
+
+
+async def delete_document(session: AsyncSession, document_id: uuid.UUID) -> bool:
+    return await repository.delete_document(session, document_id)
+
+
+async def get_latest_document_with_chunks(
+    session: AsyncSession,
+    *,
+    kind: CVDocumentKind | None = None,
+) -> CVDocument | None:
+    """Cross-module read backing :class:`~app.modules.cv.protocols.CVProvider`."""
+    return await repository.get_latest_document_with_chunks(session, kind=kind)
+
+
+async def reprocess_cv_document(session: AsyncSession, document_id: uuid.UUID) -> tuple[int, int]:
+    """Re-chunk + re-embed a document. Returns (deleted, created). Caller commits.
+
+    Idempotent on retry: any existing chunks are deleted before reprocessing.
+    """
+    document = await repository.get_document(session, document_id)
+    if document is None:
+        raise RuntimeError(f"CV document {document_id} not found")
+
+    deleted = await repository.delete_chunks_by_document(session, document_id)
+    extraction = await run_cv_extraction(document.raw_text)
+    document.candidate_name = extraction.candidate_name
+    chunks = await persist_cv_chunks(session, document_id, extraction)
+    return deleted, len(chunks)

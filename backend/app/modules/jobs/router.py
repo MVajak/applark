@@ -8,18 +8,18 @@ from redis.asyncio import Redis
 
 from app.core.database import SessionLocal
 from app.core.events import EVENTS_JOBS, publish, sse_response
+from app.core.http import conflict_on
 from app.core.redis import get_arq_pool, get_redis
-from app.modules.jobs import repository
+from app.modules.jobs import service as jobs_service
 from app.modules.jobs.events import JobStatusEvent
-from app.modules.jobs.models import Job
 from app.modules.jobs.schemas import (
     CreateJobFromText,
     CreateJobFromUrl,
     JobListItem,
     JobRead,
-    JobSourceKind,
     JobStatus,
 )
+from app.modules.jobs.service import DuplicateJobError, JobNotRetriableError
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -34,24 +34,16 @@ async def create_job_from_text(
     arq_pool: Annotated[ArqRedis, Depends(get_arq_pool)],
 ) -> JobRead:
     async with SessionLocal() as session:
-        if payload.source_url is not None:
-            existing = await repository.get_by_url(session, payload.source_url)
-            if existing is not None:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail={
-                        "message": f"Job already exists for source_url={payload.source_url}",
-                        "existing_job_id": str(existing.id),
-                    },
-                )
-
-        job = Job(
-            source_kind=JobSourceKind.pasted,
-            raw_text=payload.raw_text,
-            source_url=payload.source_url,
-            status=JobStatus.pending,
-        )
-        job = await repository.add_job(session, job)
+        try:
+            job = await jobs_service.create_job_from_text(session, payload)
+        except DuplicateJobError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "message": f"Job already exists for source_url={payload.source_url}",
+                    "existing_job_id": str(exc.existing_id),
+                },
+            ) from exc
         await session.commit()
         await session.refresh(job, attribute_names=["requirements"])
         response = JobRead.model_validate(job)
@@ -69,26 +61,17 @@ async def create_job_from_url(
     payload: CreateJobFromUrl,
     arq_pool: Annotated[ArqRedis, Depends(get_arq_pool)],
 ) -> JobRead:
-    url = str(payload.source_url)
-
     async with SessionLocal() as session:
-        existing = await repository.get_by_url(session, url)
-        if existing is not None:
+        try:
+            job = await jobs_service.create_job_from_url(session, payload)
+        except DuplicateJobError as exc:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={
-                    "message": f"Job already exists for source_url={url}",
-                    "existing_job_id": str(existing.id),
+                    "message": f"Job already exists for source_url={payload.source_url}",
+                    "existing_job_id": str(exc.existing_id),
                 },
-            )
-
-        job = Job(
-            source_kind=JobSourceKind.url,
-            source_url=url,
-            raw_text="",
-            status=JobStatus.pending,
-        )
-        job = await repository.add_job(session, job)
+            ) from exc
         await session.commit()
         await session.refresh(job, attribute_names=["requirements"])
         response = JobRead.model_validate(job)
@@ -104,7 +87,9 @@ async def get_jobs(
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[JobListItem]:
     async with SessionLocal() as session:
-        jobs = await repository.list_jobs(session, status=status_filter, limit=limit, offset=offset)
+        jobs = await jobs_service.list_jobs(
+            session, status=status_filter, limit=limit, offset=offset
+        )
         return [JobListItem.model_validate(j) for j in jobs]
 
 
@@ -126,7 +111,7 @@ async def job_events(
 @router.get("/{job_id}", response_model=JobRead)
 async def get_job(job_id: uuid.UUID) -> JobRead:
     async with SessionLocal() as session:
-        job = await repository.get_job_with_requirements(session, job_id)
+        job = await jobs_service.get_job_with_requirements(session, job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="Job not found")
         return JobRead.model_validate(job)
@@ -135,7 +120,7 @@ async def get_job(job_id: uuid.UUID) -> JobRead:
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_job(job_id: uuid.UUID) -> None:
     async with SessionLocal() as session:
-        deleted = await repository.delete_job(session, job_id)
+        deleted = await jobs_service.delete_job(session, job_id)
         if not deleted:
             raise HTTPException(status_code=404, detail="Job not found")
         await session.commit()
@@ -152,21 +137,11 @@ async def retry_job(
     redis: Annotated[Redis, Depends(get_redis)],
 ) -> JobRead:
     async with SessionLocal() as session:
-        job = await repository.get_job_with_requirements(session, job_id)
+        job = await jobs_service.get_job_with_requirements(session, job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="Job not found")
-        if job.status != JobStatus.failed:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=(f"Job status is '{job.status.value}'; only 'failed' jobs can be retried"),
-            )
-
-        task_name = (
-            "scrape_and_extract_job" if job.source_kind == JobSourceKind.url else "extract_job"
-        )
-
-        job.status = JobStatus.pending
-        job.error_message = None
+        with conflict_on(JobNotRetriableError):
+            task_name = await jobs_service.mark_for_retry(session, job)
         await session.commit()
         # updated_at is server-set via onupdate=func.now(), so SQLA expires
         # it after commit — refresh it explicitly along with requirements.

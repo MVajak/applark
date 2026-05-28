@@ -2,10 +2,11 @@
 
 Each domain defines a `Protocol` in `app/modules/<X>/protocols.py`
 describing the surface it exposes to other domains. At startup
-(`app/main.py` lifespan) the concrete implementation — typically the
-module's `repository` — is registered against the protocol. Consumer
-services pull via `providers.get(SomeProvider)` instead of importing
-the implementation directly.
+(`app/main.py`) the concrete implementation — the module's `service` —
+is registered against the protocol. Consumer services pull via
+`providers.get(SomeProvider)` instead of importing the implementation
+directly, so a module's `repository` is never reached from outside its
+own service.
 
 The point isn't dependency injection ceremony; it's that
 `grep "from app.modules.cv"` in another module returns only the
@@ -13,10 +14,10 @@ Protocol import, not the implementation. That makes cross-module
 seams explicit and makes mocking in tests trivial
 (`providers.register(CVProvider, fake)`).
 
-Implementations of these protocols are usually a `repository` module
-(a module-level set of `async def` functions). Protocols are
-structural in Python, so the module just needs to define the same
-functions — no explicit `implements`.
+Implementations of these protocols are a `service` module (a
+module-level set of `async def` functions). Protocols are structural
+in Python, so the module just needs to define the same functions — no
+explicit `implements`.
 """
 
 from __future__ import annotations

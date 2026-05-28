@@ -6,9 +6,8 @@ from redis.asyncio import Redis
 
 from app.core.database import SessionLocal
 from app.core.events import EVENTS_CV, publish
-from app.modules.cv import repository
+from app.modules.cv import service as cv_service
 from app.modules.cv.events import CvProcessingEvent
-from app.modules.cv.service import persist_cv_chunks, run_cv_extraction
 
 logger = structlog.get_logger(__name__)
 
@@ -27,21 +26,14 @@ async def chunk_and_embed_cv(ctx: dict[str, Any], document_id: str) -> dict[str,
     )
 
     async with SessionLocal() as session:
-        document = await repository.get_document(session, doc_id)
-        if document is None:
-            raise RuntimeError(f"CV document {doc_id} not found")
-
-        deleted = await repository.delete_chunks_by_document(session, doc_id)
-        extraction = await run_cv_extraction(document.raw_text)
-        document.candidate_name = extraction.candidate_name
-        chunks = await persist_cv_chunks(session, doc_id, extraction)
+        deleted, created = await cv_service.reprocess_cv_document(session, doc_id)
         await session.commit()
 
     logger.info(
         "chunk_and_embed_cv_done",
         document_id=str(doc_id),
         deleted_chunks=deleted,
-        created_chunks=len(chunks),
+        created_chunks=created,
     )
 
     redis = ctx.get("redis")
@@ -52,4 +44,4 @@ async def chunk_and_embed_cv(ctx: dict[str, Any], document_id: str) -> dict[str,
             CvProcessingEvent(document_id=doc_id, chunks_ready=True),
         )
 
-    return {"document_id": str(doc_id), "created_chunks": len(chunks)}
+    return {"document_id": str(doc_id), "created_chunks": created}

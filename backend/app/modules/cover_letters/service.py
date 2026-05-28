@@ -2,6 +2,7 @@
 
 import json
 import uuid
+from collections.abc import Sequence
 
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -97,3 +98,7 @@ Draft the cover letter per the rules in the system prompt."""
         input_tokens=input_tokens,
         output_tokens=output_tokens,
     )
+
+
+async def list_for_job(session: AsyncSession, job_id: uuid.UUID) -> Sequence[CoverLetterDraftRow]:
+    return await cover_letters_repository.list_for_job(session, job_id)

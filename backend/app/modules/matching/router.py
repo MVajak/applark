@@ -1,14 +1,14 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 
 from app.core.database import SessionLocal
-from app.core.http import conflict_on
-from app.modules.jobs import repository as jobs_repository
-from app.modules.jobs.schemas import JobStatus
-from app.modules.matching import repository
+from app.core.http import conflict_on, not_found_on
+from app.modules.matching import service as matching_service
 from app.modules.matching.schemas import MatchRunRead
 from app.modules.matching.service import (
+    JobNotFoundError,
+    JobNotReadyError,
     MissingEmbeddingsError,
     NoCVUploadedError,
     run_match,
@@ -25,19 +25,10 @@ router = APIRouter(prefix="/matching", tags=["matching"])
 async def run_match_for_job(job_id: uuid.UUID) -> MatchRunRead:
     """Run the matcher synchronously (~5-10s for one Sonnet call)."""
     async with SessionLocal() as session:
-        job = await jobs_repository.get_job(session, job_id)
-        if job is None:
-            raise HTTPException(status_code=404, detail="Job not found")
-        if job.status != JobStatus.ready:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    f"Job status is '{job.status.value}'; matching requires "
-                    "'ready'. Wait for extraction to finish or retry the job."
-                ),
-            )
-
-        with conflict_on(NoCVUploadedError, MissingEmbeddingsError):
+        with (
+            not_found_on(JobNotFoundError),
+            conflict_on(JobNotReadyError, NoCVUploadedError, MissingEmbeddingsError),
+        ):
             run = await run_match(session, job_id)
 
         await session.commit()
@@ -47,7 +38,7 @@ async def run_match_for_job(job_id: uuid.UUID) -> MatchRunRead:
 @router.get("/{job_id}/latest", response_model=MatchRunRead | None)
 async def get_latest_match(job_id: uuid.UUID) -> MatchRunRead | None:
     async with SessionLocal() as session:
-        run = await repository.get_latest_for_job(session, job_id)
+        run = await matching_service.get_latest_for_job(session, job_id)
         if run is None:
             return None
         return MatchRunRead.model_validate(run)
@@ -56,5 +47,5 @@ async def get_latest_match(job_id: uuid.UUID) -> MatchRunRead | None:
 @router.get("/{job_id}/history", response_model=list[MatchRunRead])
 async def get_match_history(job_id: uuid.UUID) -> list[MatchRunRead]:
     async with SessionLocal() as session:
-        runs = await repository.get_history_for_job(session, job_id)
+        runs = await matching_service.get_history_for_job(session, job_id)
         return [MatchRunRead.model_validate(r) for r in runs]

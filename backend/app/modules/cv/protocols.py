@@ -2,10 +2,10 @@
 
 Other modules (matching, cover_letters, cv_tailor, interview_prep)
 depend on this protocol rather than importing
-`app.modules.cv.repository` directly. The concrete repository is
-registered as the `CVProvider` implementation at startup
-(`app.main`), so production code resolves it via
-`providers.get(CVProvider)`.
+`app.modules.cv.service` directly. The concrete service is registered
+as the `CVProvider` implementation at startup (`app.main`), so
+production code resolves it via `providers.get(CVProvider)` and never
+touches the cv repository from outside the cv service.
 
 Tests can swap in a fake implementation by re-registering.
 """

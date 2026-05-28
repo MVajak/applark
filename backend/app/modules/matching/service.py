@@ -7,6 +7,7 @@ hands it to the explainer agent for the language-shaped part.
 
 import json
 import uuid
+from collections.abc import Sequence
 from typing import Any
 
 import structlog
@@ -20,7 +21,7 @@ from app.modules.cv.models import CVChunk, CVDocument
 from app.modules.cv.protocols import CVProvider
 from app.modules.cv.schemas import CVDocumentKind
 from app.modules.jobs.protocols import JobProvider
-from app.modules.jobs.schemas import JobRead
+from app.modules.jobs.schemas import JobRead, JobStatus
 from app.modules.matching import repository as matching_repository
 from app.modules.matching.agent import match_explainer
 from app.modules.matching.models import MatchRun
@@ -34,6 +35,14 @@ class NoCVUploadedError(RuntimeError):
 
 class MissingEmbeddingsError(RuntimeError):
     """Job or CV chunks lack embeddings; extraction may not be finished."""
+
+
+class JobNotFoundError(RuntimeError):
+    """No job exists for the given id."""
+
+
+class JobNotReadyError(RuntimeError):
+    """The job exists but isn't 'ready', so matching can't run yet."""
 
 
 # ----- Internal context types (passed to the agent, not the API) -----
@@ -109,7 +118,12 @@ async def build_match_context(session: AsyncSession, job_id: uuid.UUID) -> Match
     """Run all deterministic vector search and assemble the agent's input."""
     job = await providers.get(JobProvider).get_job_with_requirements(session, job_id)
     if job is None:
-        raise RuntimeError(f"Job {job_id} not found")
+        raise JobNotFoundError("Job not found")
+    if job.status != JobStatus.ready:
+        raise JobNotReadyError(
+            f"Job status is '{job.status.value}'; matching requires "
+            "'ready'. Wait for extraction to finish or retry the job."
+        )
     if job.embedding is None:
         raise MissingEmbeddingsError(
             f"Job {job_id} has no embedding — extraction may not have completed"
@@ -208,13 +222,26 @@ Now produce a MatchExplanation per the rules in the system prompt."""
     )
 
 
+async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> MatchRun | None:
+    """Cross-module read backing :class:`~app.modules.matching.protocols.MatchingProvider`."""
+    return await matching_repository.get_latest_for_job(session, job_id)
+
+
+async def get_history_for_job(session: AsyncSession, job_id: uuid.UUID) -> Sequence[MatchRun]:
+    return await matching_repository.get_history_for_job(session, job_id)
+
+
 __all__ = [
     "CandidateChunkWithScore",
+    "JobNotFoundError",
+    "JobNotReadyError",
     "MatchContext",
     "MissingEmbeddingsError",
     "NoCVUploadedError",
     "RequirementMatch",
     "build_match_context",
     "find_latest_cv",
+    "get_history_for_job",
+    "get_latest_for_job",
     "run_match",
 ]

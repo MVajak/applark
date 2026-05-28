@@ -74,3 +74,7 @@ referenced_cv_chunk_ids when the candidate has relevant experience for a questio
         input_tokens=input_tokens,
         output_tokens=output_tokens,
     )
+
+
+async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> InterviewPrepRun | None:
+    return await interview_prep_repository.get_latest_for_job(session, job_id)

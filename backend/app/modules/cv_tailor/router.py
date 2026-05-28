@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from app.core.database import SessionLocal
 from app.core.http import conflict_on
-from app.modules.cv_tailor import repository, service
+from app.modules.cv_tailor import service
 from app.modules.cv_tailor.schemas import CVTailorRunRead
 from app.modules.shared.feature_context import FeaturePrerequisitesError, NoMatchRunError
 
@@ -25,7 +25,7 @@ async def run_cv_tailor(job_id: uuid.UUID) -> CVTailorRunRead:
 @router.get("/{job_id}/latest", response_model=CVTailorRunRead | None)
 async def get_latest_cv_tailor(job_id: uuid.UUID) -> CVTailorRunRead | None:
     async with SessionLocal() as session:
-        run = await repository.get_latest_for_job(session, job_id)
+        run = await service.get_latest_for_job(session, job_id)
         if run is None:
             return None
         return CVTailorRunRead.model_validate(run)

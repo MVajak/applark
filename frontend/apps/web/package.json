@@ -11,6 +11,7 @@
     "gen:api": "orval --config orval.config.ts"
   },
   "dependencies": {
+    "@applark/i18n": "workspace:*",
     "@applark/ui": "workspace:*",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/react-query": "^5.100.11",

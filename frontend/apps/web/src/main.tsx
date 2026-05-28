@@ -7,6 +7,7 @@ import { useSpotlightStore } from '@/domains/shell/spotlight-store';
 import { initTheme } from '@/domains/theme/store';
 import { router } from '@/router';
 
+import '@applark/i18n';
 import './index.css';
 
 initTheme();

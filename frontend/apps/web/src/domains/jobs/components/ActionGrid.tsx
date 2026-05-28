@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 
+import { useTranslation } from '@applark/i18n';
 import { Badge, Card } from '@applark/ui';
 
 import { useCapabilities } from '@/domains/auth/capabilities';
@@ -34,6 +35,7 @@ function ActionCard({
   index: number;
   onSelect: () => void;
 }) {
+  const { t } = useTranslation();
   const Icon = action.icon;
 
   if (!enabled) {
@@ -41,7 +43,7 @@ function ActionCard({
       <Card aria-disabled className="cursor-not-allowed gap-3 p-5 opacity-60">
         <CardInner action={action} icon={<Icon className="size-8 text-muted-foreground" />} />
         <Badge variant="outline" className="w-fit">
-          Coming soon
+          {t('common.comingSoon')}
         </Badge>
       </Card>
     );
@@ -66,12 +68,13 @@ function ActionCard({
 }
 
 function CardInner({ action, icon }: { action: JobAction; icon: React.ReactNode }) {
+  const { t } = useTranslation();
   return (
     <>
       <div className="flex items-start justify-between">{icon}</div>
       <div className="space-y-1">
-        <div className="text-title-small-bold">{action.label}</div>
-        <p className="text-body-small text-muted-foreground">{action.description}</p>
+        <div className="text-title-small-bold">{t(action.labelKey)}</div>
+        <p className="text-body-small text-muted-foreground">{t(action.descriptionKey)}</p>
       </div>
     </>
   );

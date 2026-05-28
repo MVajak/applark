@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { useTranslation } from '@applark/i18n';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@applark/ui';
 
 import { coverLetterFeature } from '@/domains/cover_letters/feature';
@@ -28,6 +29,7 @@ export function FeatureDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const meta = JOB_ACTIONS.find((a) => a.id === action);
 
   return (
@@ -35,8 +37,8 @@ export function FeatureDrawer({
       <SheetContent className="overflow-y-auto">
         {meta && (
           <SheetHeader>
-            <SheetTitle>{meta.label}</SheetTitle>
-            <SheetDescription>{meta.description}</SheetDescription>
+            <SheetTitle>{t(meta.labelKey)}</SheetTitle>
+            <SheetDescription>{t(meta.descriptionKey)}</SheetDescription>
           </SheetHeader>
         )}
         <div className="mt-4">{action && FEATURE_SECTIONS[action](jobId)}</div>

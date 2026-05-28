@@ -1,3 +1,4 @@
+import { useTranslation } from '@applark/i18n';
 import { Badge, Card } from '@applark/ui';
 
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
@@ -15,15 +16,8 @@ const CATEGORY_ORDER: readonly QuestionCategory[] = [
   QuestionCategory.culture_fit,
 ];
 
-const CATEGORY_HEADING: Record<QuestionCategory, string> = {
-  technical: 'Technical',
-  system_design: 'System design',
-  role_specific: 'Role-specific',
-  behavioral: 'Behavioral',
-  culture_fit: 'Culture fit',
-};
-
 export function InterviewPrepPanel({ run, chunks }: { run: InterviewPrepRunRead; chunks: CVChunkRead[] }) {
+  const { t } = useTranslation();
   const chunkLookup = new Map<string, CVChunkRead>();
   for (const chunk of chunks) chunkLookup.set(chunk.id, chunk);
 
@@ -42,7 +36,9 @@ export function InterviewPrepPanel({ run, chunks }: { run: InterviewPrepRunRead;
 
       {run.likely_areas_of_focus.length > 0 && (
         <div className="space-y-2">
-          <p className="text-body-small text-muted-foreground uppercase tracking-wide">Likely areas of focus</p>
+          <p className="text-body-small text-muted-foreground uppercase tracking-wide">
+            {t('interviewPrep.areasOfFocus')}
+          </p>
           <div className="flex flex-wrap gap-2">
             {run.likely_areas_of_focus.map((area, i) => (
               <Badge key={i} variant="secondary" className="font-normal">
@@ -56,7 +52,7 @@ export function InterviewPrepPanel({ run, chunks }: { run: InterviewPrepRunRead;
       <div className="space-y-6">
         {CATEGORY_ORDER.filter((cat) => (byCategory.get(cat) ?? []).length > 0).map((cat) => (
           <section key={cat} className="space-y-3">
-            <h3 className="text-body-default-bold text-muted-foreground">{CATEGORY_HEADING[cat]}</h3>
+            <h3 className="text-body-default-bold text-muted-foreground">{t(`interviewPrep.category.${cat}`)}</h3>
             <div className="space-y-3">
               {(byCategory.get(cat) ?? []).map((q, i) => (
                 <QuestionCard key={`${cat}-${i}`} question={q} chunkLookup={chunkLookup} />

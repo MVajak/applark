@@ -1,3 +1,4 @@
+import { useTranslation } from '@applark/i18n';
 import { Badge, cn } from '@applark/ui';
 
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
@@ -10,18 +11,11 @@ const STYLES: Record<JobStatus, string> = {
   extracting: 'border-warning/30 bg-warning/10 text-warning',
 };
 
-const LABELS: Record<JobStatus, string> = {
-  pending: 'Pending',
-  scraping: 'Scraping',
-  extracting: 'Extracting',
-  ready: 'Ready',
-  failed: 'Failed',
-};
-
 export function JobStatusBadge({ status }: { status: JobStatus }) {
+  const { t } = useTranslation();
   return (
     <Badge variant="outline" className={cn('font-normal', STYLES[status])}>
-      {LABELS[status]}
+      {t(`jobs.status.${status}`)}
     </Badge>
   );
 }

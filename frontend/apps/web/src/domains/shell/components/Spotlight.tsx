@@ -2,12 +2,14 @@ import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
+import { useTranslation } from '@applark/i18n';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@applark/ui';
 
 import { useSpotlightStore } from '@/domains/shell/spotlight-store';
 import { type Theme, useThemeStore } from '@/domains/theme/store';
 
 export function Spotlight() {
+  const { t } = useTranslation();
   const isOpen = useSpotlightStore((s) => s.isOpen);
   const close = useSpotlightStore((s) => s.close);
   const navigate = useNavigate();
@@ -55,23 +57,23 @@ export function Spotlight() {
               loop
               className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-2xl backdrop-blur-xl"
             >
-              <CommandInput placeholder="Type a command or search…" />
+              <CommandInput placeholder={t('spotlight.placeholder')} />
               <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup heading="Navigate">
-                  <CommandItem onSelect={go('/')}>Home</CommandItem>
-                  <CommandItem onSelect={go('/jobs')}>Jobs</CommandItem>
-                  <CommandItem onSelect={go('/cv')}>CVs</CommandItem>
+                <CommandEmpty>{t('spotlight.empty')}</CommandEmpty>
+                <CommandGroup heading={t('spotlight.groups.navigate')}>
+                  <CommandItem onSelect={go('/')}>{t('nav.home')}</CommandItem>
+                  <CommandItem onSelect={go('/jobs')}>{t('nav.jobs')}</CommandItem>
+                  <CommandItem onSelect={go('/cv')}>{t('nav.cvs')}</CommandItem>
                 </CommandGroup>
-                <CommandGroup heading="Create">
-                  <CommandItem onSelect={go('/jobs?new=url')}>Add job from URL</CommandItem>
-                  <CommandItem onSelect={go('/jobs?new=text')}>Add job from text</CommandItem>
-                  <CommandItem onSelect={go('/cv')}>Upload CV</CommandItem>
+                <CommandGroup heading={t('spotlight.groups.create')}>
+                  <CommandItem onSelect={go('/jobs?new=url')}>{t('spotlight.items.addJobFromUrl')}</CommandItem>
+                  <CommandItem onSelect={go('/jobs?new=text')}>{t('spotlight.items.addJobFromText')}</CommandItem>
+                  <CommandItem onSelect={go('/cv')}>{t('spotlight.items.uploadCv')}</CommandItem>
                 </CommandGroup>
-                <CommandGroup heading="Theme">
-                  <CommandItem onSelect={pickTheme('light')}>Light</CommandItem>
-                  <CommandItem onSelect={pickTheme('dark')}>Dark</CommandItem>
-                  <CommandItem onSelect={pickTheme('system')}>System</CommandItem>
+                <CommandGroup heading={t('spotlight.groups.theme')}>
+                  <CommandItem onSelect={pickTheme('light')}>{t('theme.light')}</CommandItem>
+                  <CommandItem onSelect={pickTheme('dark')}>{t('theme.dark')}</CommandItem>
+                  <CommandItem onSelect={pickTheme('system')}>{t('theme.system')}</CommandItem>
                 </CommandGroup>
               </CommandList>
             </Command>

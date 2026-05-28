@@ -1,21 +1,23 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { NavLink } from 'react-router-dom';
 
+import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { cn } from '@applark/ui';
 
 import { BrandMark } from '@/domains/shell/components/BrandMark';
 import { useSpotlightStore } from '@/domains/shell/spotlight-store';
 import { ThemeToggle } from '@/domains/theme/components/ThemeToggle';
 
-type NavItem = { to: string; label: string };
+type NavItem = { to: string; labelKey: TranslationKey };
 
 const NAV: readonly NavItem[] = [
-  { to: '/', label: 'Home' },
-  { to: '/jobs', label: 'Jobs' },
-  { to: '/cv', label: 'CVs' },
+  { to: '/', labelKey: 'nav.home' },
+  { to: '/jobs', labelKey: 'nav.jobs' },
+  { to: '/cv', labelKey: 'nav.cvs' },
 ];
 
 export function AppHeader() {
+  const { t } = useTranslation();
   const { scrollY } = useScroll();
   const shadow = useTransform(scrollY, [0, 32], ['0 0 0 rgba(0,0,0,0)', '0 8px 32px rgba(0,0,0,0.08)']);
   const openSpotlight = useSpotlightStore((s) => s.open);
@@ -45,7 +47,7 @@ export function AppHeader() {
           >
             {({ isActive }) => (
               <>
-                {item.label}
+                {t(item.labelKey)}
                 {isActive && (
                   <motion.span
                     layoutId="nav-active"
@@ -64,9 +66,9 @@ export function AppHeader() {
           type="button"
           onClick={() => openSpotlight()}
           className="hidden items-center gap-2 rounded-lg border border-border/60 bg-background/40 px-2.5 py-1.5 text-body-small text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 sm:flex"
-          aria-label="Open command palette"
+          aria-label={t('nav.openCommandPalette')}
         >
-          <span>Search</span>
+          <span>{t('nav.search')}</span>
           <kbd className="rounded bg-muted px-1.5 py-0.5 text-body-small text-muted-foreground">⌘K</kbd>
         </button>
         <ThemeToggle />
@@ -77,11 +79,12 @@ export function AppHeader() {
 }
 
 function UserMenuPlaceholder() {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
-      aria-label="User menu (coming soon)"
-      title="User menu (coming soon)"
+      aria-label={t('nav.userMenu')}
+      title={t('nav.userMenu')}
       className="ml-1 inline-flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-accent-indigo to-accent-pink text-body-small-bold text-primary-foreground outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring/50"
     >
       M

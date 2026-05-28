@@ -1,0 +1,325 @@
+{
+  "common": {
+    "appName": "Applark",
+    "seeAll": "See all",
+    "comingSoon": "Coming soon",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "nav": {
+    "home": "Home",
+    "jobs": "Jobs",
+    "cvs": "CVs",
+    "search": "Search",
+    "openCommandPalette": "Open command palette",
+    "userMenu": "User menu (coming soon)"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggleAria": "Theme: {{label}}. Click to cycle.",
+    "toggleTitle": "Theme: {{label}}"
+  },
+  "home": {
+    "hero": {
+      "tagline": "Land the role. Tailor your story to every job posting — match, draft, and prep with your CV as the anchor.",
+      "browseJobs": "Browse jobs",
+      "manageCvs": "Manage CVs"
+    },
+    "overview": "Overview",
+    "stats": {
+      "total": "Total jobs",
+      "ready": "Ready",
+      "inProgress": "In progress",
+      "failed": "Failed"
+    },
+    "recent": "Recent jobs",
+    "quickActions": {
+      "title": "Quick actions",
+      "addJob": "Add a job",
+      "addJobDesc": "Paste a posting URL or text — Applark scrapes and extracts.",
+      "uploadCv": "Upload a CV",
+      "uploadCvDesc": "Drop a PDF — Applark parses it for matching against any job.",
+      "commandPalette": "Command palette",
+      "commandPaletteDesc": "Press ⌘K anywhere to jump to any page or run a quick action."
+    },
+    "empty": {
+      "title": "No jobs yet",
+      "description": "Add your first job posting to see Applark match it against your CV.",
+      "action": "Add your first job"
+    }
+  },
+  "spotlight": {
+    "placeholder": "Type a command or search…",
+    "empty": "No results found.",
+    "groups": {
+      "navigate": "Navigate",
+      "create": "Create",
+      "theme": "Theme"
+    },
+    "items": {
+      "addJobFromUrl": "Add job from URL",
+      "addJobFromText": "Add job from text",
+      "uploadCv": "Upload CV"
+    }
+  },
+  "features": {
+    "needsMatchHint": "Run match against your CV first"
+  },
+  "actions": {
+    "match": {
+      "label": "Match",
+      "description": "See how your CV maps onto this posting."
+    },
+    "coverLetter": {
+      "label": "Cover letter",
+      "description": "Draft a cover letter grounded in your strengths."
+    },
+    "tailor": {
+      "label": "Tailor CV",
+      "description": "Get chunk-by-chunk suggestions to adapt your CV."
+    },
+    "interviewPrep": {
+      "label": "Interview prep",
+      "description": "Likely questions, suggested angles, questions to ask."
+    }
+  },
+  "jobs": {
+    "untitled": "Untitled",
+    "unknownCompany": "Unknown company",
+    "status": {
+      "pending": "Pending",
+      "scraping": "Scraping",
+      "extracting": "Extracting",
+      "ready": "Ready",
+      "failed": "Failed"
+    },
+    "remote": {
+      "onsite": "On-site",
+      "hybrid": "Hybrid",
+      "remote": "Remote",
+      "unspecified": ""
+    },
+    "seniority": {
+      "junior": "Junior",
+      "mid": "Mid",
+      "senior": "Senior",
+      "lead": "Lead",
+      "principal": "Principal",
+      "unspecified": ""
+    },
+    "timeline": {
+      "pending": "Queued",
+      "scraping": "Scraping",
+      "extracting": "Extracting",
+      "ready": "Ready"
+    },
+    "filters": {
+      "all": "All",
+      "ready": "Ready",
+      "active": "In progress",
+      "failed": "Failed"
+    },
+    "list": {
+      "title": "Jobs",
+      "description": "Track and tailor your applications, all in one place.",
+      "addJob": "Add Job",
+      "addJobDialogTitle": "Add job",
+      "empty": {
+        "title": "No jobs yet",
+        "titleFiltered": "No jobs match this filter",
+        "description": "Add a job posting URL or paste the text — Applark will scrape, extract, and prepare it for matching.",
+        "descriptionFiltered": "Try selecting a different filter above.",
+        "action": "Add your first job"
+      }
+    },
+    "create": {
+      "tabUrl": "From URL",
+      "tabText": "From Text",
+      "urlLabel": "Job posting URL",
+      "urlPlaceholder": "https://example.com/jobs/12345",
+      "textLabel": "Job posting text",
+      "textPlaceholder": "Paste the full job posting here…",
+      "sourceUrlLabel": "Source URL (optional)",
+      "add": "Add",
+      "adding": "Adding…",
+      "toastDuplicate": "This URL is already on your list — opening it.",
+      "toastScraping": "Job queued — scraping…",
+      "toastExtracting": "Job queued — extracting…",
+      "errorFromUrl": "Failed to add job from URL",
+      "errorFromText": "Failed to add job from text",
+      "errorPasteUrl": "Paste a URL first",
+      "errorPasteText": "Paste the posting text first"
+    },
+    "detail": {
+      "notFound": "Job not found.",
+      "openSource": "Open source posting",
+      "failedTitle": "Job failed",
+      "retry": "Retry",
+      "retrying": "Retrying…",
+      "toastRetrying": "Retrying job",
+      "toastRetryFailed": "Retry failed",
+      "processingTitle": "Processing…",
+      "processing": "We're still {{status}}. This page will update automatically.",
+      "requirements": "Requirements",
+      "nextSteps": "Next steps"
+    },
+    "requirements": {
+      "empty": "No requirements extracted.",
+      "category": {
+        "required": "Required",
+        "niceToHave": "Nice to have",
+        "responsibility": "Responsibilities"
+      }
+    }
+  },
+  "cv": {
+    "title": "Your CVs",
+    "description": "Upload and manage the CVs you compare against jobs.",
+    "empty": {
+      "title": "No CVs uploaded yet",
+      "description": "Drop a PDF above to get started. Once it's parsed, Applark can match it against any job posting you add."
+    },
+    "kind": {
+      "cv": "CV",
+      "cover_letter": "Cover Letter"
+    },
+    "upload": {
+      "fileLabel": "PDF file",
+      "kindLabel": "Document kind",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "toastSuccess": "CV uploaded — extracting chunks…",
+      "errorFailed": "Upload failed",
+      "errorPick": "Pick a PDF first"
+    },
+    "card": {
+      "processing": "Processing…",
+      "chunks": "{{count}} chunks",
+      "expand": "Expand",
+      "collapse": "Collapse",
+      "deleteAria": "Delete CV",
+      "deleteTitle": "Delete this CV?",
+      "deleteDescription": "This permanently removes {{filename}} and all its chunks. This action cannot be undone.",
+      "toastDeleted": "CV deleted",
+      "toastDeleteFailed": "Delete failed"
+    },
+    "chunkType": {
+      "summary": "Summary",
+      "experience": "Experience",
+      "education": "Education",
+      "project": "Projects",
+      "skill": "Skills",
+      "language": "Languages",
+      "other": "Other"
+    },
+    "chunks": {
+      "present": "present"
+    }
+  },
+  "matching": {
+    "pendingCaption": "Analysing fit — this takes a few seconds…",
+    "copy": {
+      "ready": "See how well your CV maps onto this posting.",
+      "cost": "Uses Claude Sonnet — ~$0.04 per run.",
+      "runLabel": "Match against my CV",
+      "rerunLabel": "Re-run match",
+      "success": "Match complete",
+      "errorFallback": "Match failed"
+    },
+    "result": {
+      "strengths": "Strengths",
+      "gaps": "Gaps",
+      "suggestedEmphasis": "Suggested emphasis"
+    },
+    "score": {
+      "strong": "Strong fit",
+      "partial": "Partial fit",
+      "weak": "Weak fit",
+      "overall": "overall score"
+    },
+    "strengths": {
+      "empty": "No clear strengths surfaced."
+    },
+    "gaps": {
+      "empty": "No notable gaps.",
+      "severity": "severity {{percent}}%"
+    }
+  },
+  "cvTailor": {
+    "pendingCaption": "Reading your CV and identifying tweaks…",
+    "copy": {
+      "ready": "Specific, chunk-by-chunk suggestions for adapting your CV to this posting.",
+      "cost": "Uses Claude Sonnet — ~$0.04 per run.",
+      "needsMatch": "Tailor suggestions need a match run first so they can target real gaps.",
+      "runLabel": "Tailor my CV",
+      "rerunLabel": "Re-run",
+      "success": "Tailor suggestions ready",
+      "errorFallback": "Tailor failed"
+    },
+    "mostCaresAbout": "This role most cares about: ",
+    "looksGood": "Looks good for this role.",
+    "orphans": "Suggestions referencing chunks no longer in your CV (re-run after re-uploading):",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "copySuggested": "Copy suggested text",
+    "honestyChecks": "Honesty checks",
+    "kind": {
+      "emphasize": "Make this more prominent",
+      "rephrase": "Rephrase",
+      "add_detail": "Add detail",
+      "deprioritize": "Push this down or remove"
+    }
+  },
+  "coverLetters": {
+    "pendingCaption": "Drafting…",
+    "copy": {
+      "ready": "Draft a cover letter grounded in your match strengths.",
+      "cost": "Uses Claude Sonnet — ~$0.02 per draft.",
+      "needsMatch": "A cover letter draft cites your match strengths — run a match first so it references real CV chunks.",
+      "runLabel": "Generate cover letter",
+      "rerunLabel": "Generate again",
+      "success": "Draft ready",
+      "errorFallback": "Cover letter generation failed"
+    },
+    "showPrevious": "Show previous drafts ({{count}})",
+    "hidePrevious": "Hide previous drafts ({{count}})",
+    "copyBody": "Copy body",
+    "copyWithSubject": "Copy with subject",
+    "copied": "Copied",
+    "copiedWithSubject": "Copied with subject",
+    "referencedChunks": "Referenced CV chunks"
+  },
+  "interviewPrep": {
+    "pending": {
+      "0": "Reading the job posting…",
+      "1": "Thinking like an interviewer…",
+      "2": "Drafting questions and angles…"
+    },
+    "copy": {
+      "ready": "A study sheet of likely questions, suggested angles, and questions to ask back — grounded in this job and your CV.",
+      "cost": "Uses Claude Sonnet — ~$0.05 per run.",
+      "needsMatch": "Interview prep needs a match run first so questions can target what this team actually cares about.",
+      "runLabel": "Generate interview prep",
+      "rerunLabel": "Re-generate",
+      "success": "Interview prep ready",
+      "errorFallback": "Interview prep failed"
+    },
+    "category": {
+      "technical": "Technical",
+      "system_design": "System design",
+      "role_specific": "Role-specific",
+      "behavioral": "Behavioral",
+      "culture_fit": "Culture fit"
+    },
+    "areasOfFocus": "Likely areas of focus",
+    "whyLikely": "Why this is likely",
+    "howToApproach": "How to approach",
+    "noDirectExperience": "No direct experience — frame as a learning angle.",
+    "drawOn": "Draw on",
+    "notInCv": "{{count}} not in current CV",
+    "orphanTooltip": "The agent cited a chunk that isn't in your current CV — usually safe to ignore.",
+    "questionsToAsk": "Questions to ask them"
+  }
+}

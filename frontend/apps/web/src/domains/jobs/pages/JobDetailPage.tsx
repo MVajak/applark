@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft, RotateCcw } from 'lucide-react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { useTranslation } from '@applark/i18n';
 import { Alert, AlertDescription, AlertTitle, Button, Skeleton } from '@applark/ui';
 
 import { useGetJob, useRetryJob } from '@/domains/api/generated/jobs/jobs';
@@ -17,6 +18,7 @@ import { RequirementsList } from '@/domains/jobs/components/RequirementsList';
 import { ACTIVE_STATUSES } from '@/domains/jobs/constants';
 
 export function JobDetailPage() {
+  const { t } = useTranslation();
   const { id = '' } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -31,9 +33,9 @@ export function JobDetailPage() {
     mutation: {
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: jobQuery.queryKey });
-        toast.success('Retrying job');
+        toast.success(t('jobs.detail.toastRetrying'));
       },
-      onError: () => toast.error('Retry failed'),
+      onError: () => toast.error(t('jobs.detail.toastRetryFailed')),
     },
   });
 
@@ -69,7 +71,7 @@ export function JobDetailPage() {
     return (
       <div className="space-y-4">
         <BackLink />
-        <p className="text-body-default text-muted-foreground">Job not found.</p>
+        <p className="text-body-default text-muted-foreground">{t('jobs.detail.notFound')}</p>
       </div>
     );
   }
@@ -87,7 +89,7 @@ export function JobDetailPage() {
       {job.status === JobStatus.failed && job.error_message && (
         <Alert variant="destructive">
           <AlertTriangle className="size-4" />
-          <AlertTitle>Job failed</AlertTitle>
+          <AlertTitle>{t('jobs.detail.failedTitle')}</AlertTitle>
           <AlertDescription className="space-y-2">
             <p className="whitespace-pre-wrap font-mono text-body-small">{job.error_message}</p>
             <Button
@@ -96,7 +98,7 @@ export function JobDetailPage() {
               onClick={() => retry.mutate({ jobId: job.id })}
               disabled={retry.isPending}
             >
-              <RotateCcw className="size-3" /> {retry.isPending ? 'Retrying…' : 'Retry'}
+              <RotateCcw className="size-3" /> {retry.isPending ? t('jobs.detail.retrying') : t('jobs.detail.retry')}
             </Button>
           </AlertDescription>
         </Alert>
@@ -104,19 +106,19 @@ export function JobDetailPage() {
 
       {ACTIVE_STATUSES.has(job.status) && (
         <Alert>
-          <AlertTitle className="animate-pulse">Processing…</AlertTitle>
-          <AlertDescription>We're still {job.status}. This page will update automatically.</AlertDescription>
+          <AlertTitle className="animate-pulse">{t('jobs.detail.processingTitle')}</AlertTitle>
+          <AlertDescription>{t('jobs.detail.processing', { status: job.status })}</AlertDescription>
         </Alert>
       )}
 
       <section className="space-y-3">
-        <h2 className="text-title-small-bold">Requirements</h2>
+        <h2 className="text-title-small-bold">{t('jobs.detail.requirements')}</h2>
         <RequirementsList requirements={job.requirements} />
       </section>
 
       {job.status === JobStatus.ready && (
         <section className="space-y-3">
-          <h2 className="text-title-small-bold">Next steps</h2>
+          <h2 className="text-title-small-bold">{t('jobs.detail.nextSteps')}</h2>
           <ActionGrid onSelect={openAction} />
         </section>
       )}
@@ -134,12 +136,13 @@ export function JobDetailPage() {
 }
 
 function BackLink() {
+  const { t } = useTranslation();
   return (
     <Link
       to="/jobs"
       className="inline-flex items-center gap-1.5 text-body-default text-muted-foreground hover:text-foreground"
     >
-      <ArrowLeft className="size-4" /> Jobs
+      <ArrowLeft className="size-4" /> {t('nav.jobs')}
     </Link>
   );
 }

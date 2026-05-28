@@ -1,39 +1,23 @@
 import { ExternalLink } from 'lucide-react';
 
+import { useTranslation } from '@applark/i18n';
 import { Badge } from '@applark/ui';
 
 import type { JobRead } from '@/domains/api/generated/model/jobRead';
-import { RemotePolicy } from '@/domains/api/generated/model/remotePolicy';
-import { Seniority } from '@/domains/api/generated/model/seniority';
 import { JobStatusBadge } from '@/domains/jobs/components/JobStatusBadge';
 
-const REMOTE_LABEL: Record<RemotePolicy, string> = {
-  onsite: 'On-site',
-  hybrid: 'Hybrid',
-  remote: 'Remote',
-  unspecified: '',
-};
-
-const SENIORITY_LABEL: Record<Seniority, string> = {
-  junior: 'Junior',
-  mid: 'Mid',
-  senior: 'Senior',
-  lead: 'Lead',
-  principal: 'Principal',
-  unspecified: '',
-};
-
 export function JobDetailHeader({ job }: { job: JobRead }) {
-  const remoteLabel = REMOTE_LABEL[job.remote_policy];
-  const seniorityLabel = SENIORITY_LABEL[job.seniority];
+  const { t } = useTranslation();
+  const remoteLabel = t(`jobs.remote.${job.remote_policy}`);
+  const seniorityLabel = t(`jobs.seniority.${job.seniority}`);
 
   return (
     <header className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-2">
-          <h1 className="text-title-large-bold tracking-tight">{job.title ?? 'Untitled'}</h1>
+          <h1 className="text-title-large-bold tracking-tight">{job.title ?? t('jobs.untitled')}</h1>
           <div className="text-body-large text-muted-foreground">
-            <span>{job.company ?? 'Unknown company'}</span>
+            <span>{job.company ?? t('jobs.unknownCompany')}</span>
             {job.location && <span> · {job.location}</span>}
           </div>
         </div>
@@ -43,7 +27,7 @@ export function JobDetailHeader({ job }: { job: JobRead }) {
               href={job.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Open source posting"
+              aria-label={t('jobs.detail.openSource')}
               className="inline-flex size-9 items-center justify-center rounded-lg border border-border text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               <ExternalLink className="size-4" />

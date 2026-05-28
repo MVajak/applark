@@ -1,3 +1,4 @@
+import { useTranslation } from '@applark/i18n';
 import { Separator } from '@applark/ui';
 
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
@@ -13,17 +14,8 @@ const CHUNK_TYPE_ORDER: readonly CVChunkType[] = [
   CVChunkType.other,
 ];
 
-const CHUNK_TYPE_LABEL: Record<CVChunkType, string> = {
-  summary: 'Summary',
-  experience: 'Experience',
-  education: 'Education',
-  project: 'Projects',
-  skill: 'Skills',
-  language: 'Languages',
-  other: 'Other',
-};
-
 function ExperienceMeta({ metadata }: { metadata: Record<string, unknown> }) {
+  const { t } = useTranslation();
   const company = metadata.company as string | undefined;
   const role = metadata.role as string | undefined;
   const start = metadata.start_date as string | undefined;
@@ -36,7 +28,7 @@ function ExperienceMeta({ metadata }: { metadata: Record<string, unknown> }) {
       {company && <span>{company}</span>}
       {(start || end) && (
         <span className="ml-2">
-          ({start ?? '?'} – {end ?? 'present'})
+          ({start ?? '?'} – {end ?? t('cv.chunks.present')})
         </span>
       )}
     </div>
@@ -56,6 +48,7 @@ function ProjectMeta({ metadata }: { metadata: Record<string, unknown> }) {
 }
 
 export function CVChunkList({ chunks }: { chunks: CVChunkRead[] }) {
+  const { t } = useTranslation();
   if (chunks.length === 0) return null;
 
   const byType = new Map<CVChunkType, CVChunkRead[]>();
@@ -73,7 +66,7 @@ export function CVChunkList({ chunks }: { chunks: CVChunkRead[] }) {
         <div key={type} className="space-y-3">
           {idx > 0 && <Separator />}
           <h3 className="text-body-default-bold text-muted-foreground uppercase tracking-wide">
-            {CHUNK_TYPE_LABEL[type]}
+            {t(`cv.chunkType.${type}`)}
           </h3>
           <ul className="space-y-3">
             {(byType.get(type) ?? []).map((chunk) => (

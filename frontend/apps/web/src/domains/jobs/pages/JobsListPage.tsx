@@ -3,6 +3,7 @@ import { Briefcase, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
 
+import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { Button, cn, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Skeleton } from '@applark/ui';
 
 import { useGetJobs } from '@/domains/api/generated/jobs/jobs';
@@ -12,16 +13,17 @@ import { JobListCard } from '@/domains/jobs/components/JobListCard';
 import { ACTIVE_STATUSES } from '@/domains/jobs/constants';
 import { EmptyState } from '@/domains/shell/components/EmptyState';
 
-const FILTERS = [
-  { id: 'all' as const, label: 'All' },
-  { id: 'ready' as const, label: 'Ready', status: JobStatus.ready },
-  { id: 'active' as const, label: 'In progress' },
-  { id: 'failed' as const, label: 'Failed', status: JobStatus.failed },
+type FilterId = 'all' | 'ready' | 'active' | 'failed';
+
+const FILTERS: readonly { id: FilterId; labelKey: TranslationKey }[] = [
+  { id: 'all', labelKey: 'jobs.filters.all' },
+  { id: 'ready', labelKey: 'jobs.filters.ready' },
+  { id: 'active', labelKey: 'jobs.filters.active' },
+  { id: 'failed', labelKey: 'jobs.filters.failed' },
 ];
 
-type FilterId = (typeof FILTERS)[number]['id'];
-
 export function JobsListPage() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterId>('all');
   const [searchParams, setSearchParams] = useSearchParams();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -60,20 +62,18 @@ export function JobsListPage() {
     <div className="space-y-8">
       <header className="flex flex-col gap-4 border-border/60 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-title-large-bold tracking-tight">Jobs</h1>
-          <p className="text-body-default text-muted-foreground">
-            Track and tailor your applications, all in one place.
-          </p>
+          <h1 className="text-title-large-bold tracking-tight">{t('jobs.list.title')}</h1>
+          <p className="text-body-default text-muted-foreground">{t('jobs.list.description')}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="gradient">
-              <Plus className="size-4" /> Add Job
+              <Plus className="size-4" /> {t('jobs.list.addJob')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Add job</DialogTitle>
+              <DialogTitle>{t('jobs.list.addJobDialogTitle')}</DialogTitle>
             </DialogHeader>
             <JobCreateForm onCreated={() => setDialogOpen(false)} />
           </DialogContent>
@@ -104,16 +104,12 @@ export function JobsListPage() {
       ) : (
         <EmptyState
           icon={Briefcase}
-          title={filter === 'all' ? 'No jobs yet' : 'No jobs match this filter'}
-          description={
-            filter === 'all'
-              ? 'Add a job posting URL or paste the text — Applark will scrape, extract, and prepare it for matching.'
-              : 'Try selecting a different filter above.'
-          }
+          title={filter === 'all' ? t('jobs.list.empty.title') : t('jobs.list.empty.titleFiltered')}
+          description={filter === 'all' ? t('jobs.list.empty.description') : t('jobs.list.empty.descriptionFiltered')}
           action={
             filter === 'all' ? (
               <Button variant="gradient" onClick={() => setDialogOpen(true)}>
-                <Plus className="size-4" /> Add your first job
+                <Plus className="size-4" /> {t('jobs.list.empty.action')}
               </Button>
             ) : undefined
           }
@@ -132,6 +128,7 @@ function FilterBar({
   onChange: (id: FilterId) => void;
   counts: { all: number; ready: number; active: number; failed: number };
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {FILTERS.map((f) => {
@@ -156,7 +153,7 @@ function FilterBar({
               />
             )}
             <span className="relative">
-              {f.label} <span className="ml-1 text-muted-foreground tabular-nums">{count}</span>
+              {t(f.labelKey)} <span className="ml-1 text-muted-foreground tabular-nums">{count}</span>
             </span>
           </button>
         );

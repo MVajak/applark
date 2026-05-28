@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useTranslation } from '@applark/i18n';
 import { Button, Card, cn } from '@applark/ui';
 
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
@@ -9,6 +10,7 @@ import { DoNotSuggestBox } from '@/domains/cv_tailor/components/DoNotSuggestBox'
 import { SuggestionCard } from '@/domains/cv_tailor/components/SuggestionCard';
 
 function ChunkBlock({ chunk, suggestions }: { chunk: CVChunkRead; suggestions: TailorSuggestion[] }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const hasSuggestions = suggestions.length > 0;
   const isLong = chunk.content.length > 220;
@@ -26,7 +28,7 @@ function ChunkBlock({ chunk, suggestions }: { chunk: CVChunkRead; suggestions: T
       </p>
       {isLong && (
         <Button variant="ghost" size="sm" className="h-6 px-2 text-body-small" onClick={() => setExpanded((v) => !v)}>
-          {expanded ? 'Show less' : 'Show more'}
+          {expanded ? t('cvTailor.showLess') : t('cvTailor.showMore')}
         </Button>
       )}
 
@@ -37,13 +39,14 @@ function ChunkBlock({ chunk, suggestions }: { chunk: CVChunkRead; suggestions: T
           ))}
         </div>
       ) : (
-        <p className="pt-1 text-body-small text-muted-foreground italic">Looks good for this role.</p>
+        <p className="pt-1 text-body-small text-muted-foreground italic">{t('cvTailor.looksGood')}</p>
       )}
     </div>
   );
 }
 
 export function CVTailorResultPanel({ run, chunks }: { run: CVTailorRunRead; chunks: CVChunkRead[] }) {
+  const { t } = useTranslation();
   // Group suggestions by cv_chunk_id so each chunk renders its own.
   const byChunk = new Map<string, TailorSuggestion[]>();
   for (const s of run.suggestions) {
@@ -63,7 +66,7 @@ export function CVTailorResultPanel({ run, chunks }: { run: CVTailorRunRead; chu
     <div className="space-y-4">
       <Card className="bg-muted/30 p-4">
         <p className="text-body-default">
-          <span className="text-muted-foreground">This role most cares about: </span>
+          <span className="text-muted-foreground">{t('cvTailor.mostCaresAbout')}</span>
           <span className="text-foreground">{run.job_summary}</span>
         </p>
       </Card>
@@ -78,9 +81,7 @@ export function CVTailorResultPanel({ run, chunks }: { run: CVTailorRunRead; chu
 
       {orphans.length > 0 && (
         <div className="space-y-2">
-          <p className="text-body-small text-muted-foreground">
-            Suggestions referencing chunks no longer in your CV (re-run after re-uploading):
-          </p>
+          <p className="text-body-small text-muted-foreground">{t('cvTailor.orphans')}</p>
           {orphans.map((s, i) => (
             <SuggestionCard key={`orphan-${i}`} suggestion={s} />
           ))}

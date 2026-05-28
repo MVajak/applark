@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 
+import { useTranslation } from '@applark/i18n';
 import { Button } from '@applark/ui';
 
 import {
@@ -14,6 +15,7 @@ import { CoverLetterDraftCard } from '@/domains/cover_letters/components/CoverLe
 import type { FeatureSectionConfig } from '@/domains/jobs/components/FeatureSection';
 
 function CoverLetterDrafts({ drafts, chunks }: { drafts: CoverLetterDraftRead[]; chunks: CVChunkRead[] }) {
+  const { t } = useTranslation();
   const [showPrevious, setShowPrevious] = useState(false);
 
   const chunkLookup = new Map<string, CVChunkRead>();
@@ -29,7 +31,9 @@ function CoverLetterDrafts({ drafts, chunks }: { drafts: CoverLetterDraftRead[];
       {previousDrafts.length > 0 && (
         <div className="pt-2">
           <Button type="button" variant="ghost" size="sm" onClick={() => setShowPrevious((v) => !v)} className="-ml-2">
-            {showPrevious ? 'Hide' : 'Show'} previous drafts ({previousDrafts.length})
+            {showPrevious
+              ? t('coverLetters.hidePrevious', { count: previousDrafts.length })
+              : t('coverLetters.showPrevious', { count: previousDrafts.length })}
           </Button>
           {showPrevious && (
             <div className="mt-3 space-y-4">
@@ -51,15 +55,15 @@ export const coverLetterFeature: FeatureSectionConfig<CoverLetterDraftRead[]> = 
   useMutation: useGenerateCoverLetter,
   invalidateKey: getGetCoverLettersQueryKey,
   hasResult: (data): data is CoverLetterDraftRead[] => (data?.length ?? 0) > 0,
-  pendingCaption: 'Drafting…',
+  pendingCaption: 'coverLetters.pendingCaption',
   copy: {
-    ready: 'Draft a cover letter grounded in your match strengths.',
-    cost: 'Uses Claude Sonnet — ~$0.02 per draft.',
-    needsMatch: 'A cover letter draft cites your match strengths — run a match first so it references real CV chunks.',
-    runLabel: 'Generate cover letter',
-    rerunLabel: 'Generate again',
-    success: 'Draft ready',
-    errorFallback: 'Cover letter generation failed',
+    ready: 'coverLetters.copy.ready',
+    cost: 'coverLetters.copy.cost',
+    needsMatch: 'coverLetters.copy.needsMatch',
+    runLabel: 'coverLetters.copy.runLabel',
+    rerunLabel: 'coverLetters.copy.rerunLabel',
+    success: 'coverLetters.copy.success',
+    errorFallback: 'coverLetters.copy.errorFallback',
   },
   renderResult: ({ result, chunks }) => <CoverLetterDrafts drafts={result} chunks={chunks} />,
 };

@@ -1,5 +1,6 @@
 import { Sparkles } from 'lucide-react';
 
+import { useTranslation } from '@applark/i18n';
 import { Card, Separator } from '@applark/ui';
 
 import { getGetLatestMatchQueryKey, useGetLatestMatch, useRunMatch } from '@/domains/api/generated/matching/matching';
@@ -14,6 +15,7 @@ import { StrengthsList } from '@/domains/matching/components/StrengthsList';
 import { SuggestedEmphasis } from '@/domains/matching/components/SuggestedEmphasis';
 
 function MatchResult({ exp }: { exp: MatchExplanation }) {
+  const { t } = useTranslation();
   return (
     <>
       <Card className="p-6">
@@ -24,12 +26,16 @@ function MatchResult({ exp }: { exp: MatchExplanation }) {
 
       <Card className="space-y-6 p-6">
         <div>
-          <h3 className="mb-3 text-body-default-bold text-muted-foreground uppercase tracking-wide">Strengths</h3>
+          <h3 className="mb-3 text-body-default-bold text-muted-foreground uppercase tracking-wide">
+            {t('matching.result.strengths')}
+          </h3>
           <StrengthsList strengths={exp.strengths} />
         </div>
         <Separator />
         <div>
-          <h3 className="mb-3 text-body-default-bold text-muted-foreground uppercase tracking-wide">Gaps</h3>
+          <h3 className="mb-3 text-body-default-bold text-muted-foreground uppercase tracking-wide">
+            {t('matching.result.gaps')}
+          </h3>
           <GapsList gaps={exp.gaps} />
         </div>
         {exp.suggested_emphasis.length > 0 && (
@@ -37,7 +43,7 @@ function MatchResult({ exp }: { exp: MatchExplanation }) {
             <Separator />
             <div>
               <h3 className="mb-3 text-body-default-bold text-muted-foreground uppercase tracking-wide">
-                Suggested emphasis
+                {t('matching.result.suggestedEmphasis')}
               </h3>
               <SuggestedEmphasis items={exp.suggested_emphasis} />
             </div>
@@ -56,14 +62,14 @@ export const matchFeature: FeatureSectionConfig<GetLatestMatch200, MatchRunRead>
   useMutation: useRunMatch,
   invalidateKey: getGetLatestMatchQueryKey,
   hasResult: (data): data is MatchRunRead => data != null,
-  pendingCaption: 'Analysing fit — this takes a few seconds…',
+  pendingCaption: 'matching.pendingCaption',
   copy: {
-    ready: 'See how well your CV maps onto this posting.',
-    cost: 'Uses Claude Sonnet — ~$0.04 per run.',
-    runLabel: 'Match against my CV',
-    rerunLabel: 'Re-run match',
-    success: 'Match complete',
-    errorFallback: 'Match failed',
+    ready: 'matching.copy.ready',
+    cost: 'matching.copy.cost',
+    runLabel: 'matching.copy.runLabel',
+    rerunLabel: 'matching.copy.rerunLabel',
+    success: 'matching.copy.success',
+    errorFallback: 'matching.copy.errorFallback',
   },
   renderResult: ({ result }) => <MatchResult exp={result.details} />,
 };

@@ -1,14 +1,16 @@
 import { Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { useTranslation } from '@applark/i18n';
 import { Card, relativeTime } from '@applark/ui';
 
 import type { JobListItem } from '@/domains/api/generated/model/jobListItem';
 import { JobStatusBadge } from '@/domains/jobs/components/JobStatusBadge';
 
 export function JobListCard({ job }: { job: JobListItem }) {
-  const title = job.title ?? 'Untitled';
-  const company = job.company ?? 'Unknown company';
+  const { t } = useTranslation();
+  const title = job.title ?? t('jobs.untitled');
+  const company = job.company ?? t('jobs.unknownCompany');
 
   return (
     <Link

@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useTranslation } from '@applark/i18n';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +28,7 @@ import type { CVDocumentRead } from '@/domains/api/generated/model/cVDocumentRea
 import { CVChunkList } from '@/domains/cv/components/CVChunkList';
 
 export function CVDocumentCard({ document }: { document: CVDocumentRead }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const isProcessing = document.chunks.length === 0;
@@ -35,9 +37,9 @@ export function CVDocumentCard({ document }: { document: CVDocumentRead }) {
     mutation: {
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: getGetCvDocumentsQueryKey() });
-        toast.success('CV deleted');
+        toast.success(t('cv.card.toastDeleted'));
       },
-      onError: () => toast.error('Delete failed'),
+      onError: () => toast.error(t('cv.card.toastDeleteFailed')),
     },
   });
 
@@ -48,14 +50,14 @@ export function CVDocumentCard({ document }: { document: CVDocumentRead }) {
           <div className="min-w-0 flex-1 space-y-1.5">
             <CardTitle className="truncate text-title-small-bold">{document.filename}</CardTitle>
             <div className="flex items-center gap-2 text-body-small text-muted-foreground">
-              <Badge variant="secondary">{document.kind === 'cv' ? 'CV' : 'Cover Letter'}</Badge>
+              <Badge variant="secondary">{t(`cv.kind.${document.kind}`)}</Badge>
               <span>{relativeTime(document.created_at)}</span>
               {isProcessing && (
                 <Badge variant="outline" className="animate-pulse">
-                  Processing…
+                  {t('cv.card.processing')}
                 </Badge>
               )}
-              {!isProcessing && <span>· {document.chunks.length} chunks</span>}
+              {!isProcessing && <span>· {t('cv.card.chunks', { count: document.chunks.length })}</span>}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
@@ -64,27 +66,27 @@ export function CVDocumentCard({ document }: { document: CVDocumentRead }) {
               size="sm"
               onClick={() => setExpanded((v) => !v)}
               disabled={isProcessing}
-              aria-label={expanded ? 'Collapse' : 'Expand'}
+              aria-label={expanded ? t('cv.card.collapse') : t('cv.card.expand')}
             >
               {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm" aria-label="Delete CV" disabled={remove.isPending}>
+                <Button variant="ghost" size="sm" aria-label={t('cv.card.deleteAria')} disabled={remove.isPending}>
                   <Trash2 className="size-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete this CV?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('cv.card.deleteTitle')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This permanently removes {document.filename} and all its chunks. This action cannot be undone.
+                    {t('cv.card.deleteDescription', { filename: document.filename })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                   <AlertDialogAction onClick={() => remove.mutate({ documentId: document.id })}>
-                    Delete
+                    {t('common.delete')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

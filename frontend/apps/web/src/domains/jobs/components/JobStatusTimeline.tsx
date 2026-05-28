@@ -1,17 +1,18 @@
 import { CheckCircle2, Circle, Loader2, OctagonX } from 'lucide-react';
 import { motion } from 'motion/react';
 
+import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { cn } from '@applark/ui';
 
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
 
-type Step = { id: JobStatus; label: string };
+type Step = { id: JobStatus; labelKey: TranslationKey };
 
 const STEPS: readonly Step[] = [
-  { id: JobStatus.pending, label: 'Queued' },
-  { id: JobStatus.scraping, label: 'Scraping' },
-  { id: JobStatus.extracting, label: 'Extracting' },
-  { id: JobStatus.ready, label: 'Ready' },
+  { id: JobStatus.pending, labelKey: 'jobs.timeline.pending' },
+  { id: JobStatus.scraping, labelKey: 'jobs.timeline.scraping' },
+  { id: JobStatus.extracting, labelKey: 'jobs.timeline.extracting' },
+  { id: JobStatus.ready, labelKey: 'jobs.timeline.ready' },
 ];
 
 const ORDER: Record<JobStatus, number> = {
@@ -23,6 +24,7 @@ const ORDER: Record<JobStatus, number> = {
 };
 
 export function JobStatusTimeline({ status }: { status: JobStatus }) {
+  const { t } = useTranslation();
   const failed = status === JobStatus.failed;
   const ready = status === JobStatus.ready;
   // When ready, every step is done. When in-progress, step at currentIndex is active.
@@ -65,7 +67,7 @@ export function JobStatusTimeline({ status }: { status: JobStatus }) {
                 isFailedStep && 'text-destructive'
               )}
             >
-              {step.label}
+              {t(step.labelKey)}
             </span>
             {i < STEPS.length - 1 && <span aria-hidden className="h-px w-6 bg-border" />}
           </li>

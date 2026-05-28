@@ -3,6 +3,7 @@ import { ArrowRight, Briefcase, CheckCircle2, Command, FileText, Loader2, Octago
 import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { useTranslation } from '@applark/i18n';
 import { Button } from '@applark/ui';
 
 import { useGetJobs } from '@/domains/api/generated/jobs/jobs';
@@ -15,6 +16,7 @@ import { EmptyState } from '@/domains/shell/components/EmptyState';
 import { useSpotlightStore } from '@/domains/shell/spotlight-store';
 
 export function HomePage() {
+  const { t } = useTranslation();
   const { data, isLoading } = useGetJobs();
   const navigate = useNavigate();
   const openSpotlight = useSpotlightStore((s) => s.open);
@@ -37,23 +39,41 @@ export function HomePage() {
       <Hero />
 
       <Section delay={0.05}>
-        <SectionHeader title="Overview" />
+        <SectionHeader title={t('home.overview')} />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard icon={Briefcase} label="Total jobs" value={stats.total} loading={isLoading} />
-          <StatCard icon={CheckCircle2} label="Ready" value={stats.ready} tone="positive" loading={isLoading} />
-          <StatCard icon={Loader2} label="In progress" value={stats.active} tone="warning" loading={isLoading} />
-          <StatCard icon={OctagonX} label="Failed" value={stats.failed} tone="destructive" loading={isLoading} />
+          <StatCard icon={Briefcase} label={t('home.stats.total')} value={stats.total} loading={isLoading} />
+          <StatCard
+            icon={CheckCircle2}
+            label={t('home.stats.ready')}
+            value={stats.ready}
+            tone="positive"
+            loading={isLoading}
+          />
+          <StatCard
+            icon={Loader2}
+            label={t('home.stats.inProgress')}
+            value={stats.active}
+            tone="warning"
+            loading={isLoading}
+          />
+          <StatCard
+            icon={OctagonX}
+            label={t('home.stats.failed')}
+            value={stats.failed}
+            tone="destructive"
+            loading={isLoading}
+          />
         </div>
       </Section>
 
       <Section delay={0.1}>
         <SectionHeader
-          title="Recent jobs"
+          title={t('home.recent')}
           action={
             hasJobs ? (
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/jobs">
-                  See all <ArrowRight className="size-3.5" />
+                  {t('common.seeAll')} <ArrowRight className="size-3.5" />
                 </Link>
               </Button>
             ) : undefined
@@ -64,11 +84,11 @@ export function HomePage() {
         ) : (
           <EmptyState
             icon={Briefcase}
-            title="No jobs yet"
-            description="Add your first job posting to see Applark match it against your CV."
+            title={t('home.empty.title')}
+            description={t('home.empty.description')}
             action={
               <Button variant="gradient" onClick={() => navigate('/jobs?new=url')}>
-                <Plus className="size-4" /> Add your first job
+                <Plus className="size-4" /> {t('home.empty.action')}
               </Button>
             }
           />
@@ -76,24 +96,24 @@ export function HomePage() {
       </Section>
 
       <Section delay={0.15}>
-        <SectionHeader title="Quick actions" />
+        <SectionHeader title={t('home.quickActions.title')} />
         <div className="grid gap-3 sm:grid-cols-3">
           <QuickActionCard
             icon={Plus}
-            label="Add a job"
-            description="Paste a posting URL or text — Applark scrapes and extracts."
+            label={t('home.quickActions.addJob')}
+            description={t('home.quickActions.addJobDesc')}
             onClick={() => navigate('/jobs?new=url')}
           />
           <QuickActionCard
             icon={FileText}
-            label="Upload a CV"
-            description="Drop a PDF — Applark parses it for matching against any job."
+            label={t('home.quickActions.uploadCv')}
+            description={t('home.quickActions.uploadCvDesc')}
             onClick={() => navigate('/cv')}
           />
           <QuickActionCard
             icon={Command}
-            label="Command palette"
-            description="Press ⌘K anywhere to jump to any page or run a quick action."
+            label={t('home.quickActions.commandPalette')}
+            description={t('home.quickActions.commandPaletteDesc')}
             onClick={() => openSpotlight()}
           />
         </div>
@@ -103,6 +123,7 @@ export function HomePage() {
 }
 
 function Hero() {
+  const { t } = useTranslation();
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
@@ -114,21 +135,19 @@ function Hero() {
       <div className="relative space-y-6">
         <div className="space-y-3">
           <h1 className="text-display-default-bold text-gradient tracking-tight md:text-display-large-bold">
-            Applark
+            {t('common.appName')}
           </h1>
-          <p className="max-w-xl text-body-large text-muted-foreground">
-            Land the role. Tailor your story to every job posting — match, draft, and prep with your CV as the anchor.
-          </p>
+          <p className="max-w-xl text-body-large text-muted-foreground">{t('home.hero.tagline')}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button variant="gradient" size="lg" asChild>
             <Link to="/jobs">
-              <Briefcase className="size-4" /> Browse jobs <ArrowRight className="size-4" />
+              <Briefcase className="size-4" /> {t('home.hero.browseJobs')} <ArrowRight className="size-4" />
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
             <Link to="/cv">
-              <FileText className="size-4" /> Manage CVs
+              <FileText className="size-4" /> {t('home.hero.manageCvs')}
             </Link>
           </Button>
         </div>

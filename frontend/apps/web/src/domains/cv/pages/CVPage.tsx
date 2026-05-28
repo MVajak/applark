@@ -1,5 +1,6 @@
 import { FileText } from 'lucide-react';
 
+import { useTranslation } from '@applark/i18n';
 import { Skeleton } from '@applark/ui';
 
 import { useGetCvDocuments } from '@/domains/api/generated/cv/cv';
@@ -8,13 +9,14 @@ import { CVUploadForm } from '@/domains/cv/components/CVUploadForm';
 import { EmptyState } from '@/domains/shell/components/EmptyState';
 
 export function CVPage() {
+  const { t } = useTranslation();
   const { data, isLoading } = useGetCvDocuments();
 
   return (
     <div className="space-y-8">
       <header className="space-y-1 border-border/60 border-b pb-6">
-        <h1 className="text-title-large-bold tracking-tight">Your CVs</h1>
-        <p className="text-body-default text-muted-foreground">Upload and manage the CVs you compare against jobs.</p>
+        <h1 className="text-title-large-bold tracking-tight">{t('cv.title')}</h1>
+        <p className="text-body-default text-muted-foreground">{t('cv.description')}</p>
       </header>
 
       <section className="space-y-3">
@@ -34,11 +36,7 @@ export function CVPage() {
             ))}
           </div>
         ) : (
-          <EmptyState
-            icon={FileText}
-            title="No CVs uploaded yet"
-            description="Drop a PDF above to get started. Once it's parsed, Applark can match it against any job posting you add."
-          />
+          <EmptyState icon={FileText} title={t('cv.empty.title')} description={t('cv.empty.description')} />
         )}
       </section>
     </div>

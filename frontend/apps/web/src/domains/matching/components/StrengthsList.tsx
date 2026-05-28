@@ -1,10 +1,13 @@
 import { Check } from 'lucide-react';
 
+import { useTranslation } from '@applark/i18n';
+
 import type { MappedExperience } from '@/domains/api/generated/model/mappedExperience';
 
 export function StrengthsList({ strengths }: { strengths: MappedExperience[] }) {
+  const { t } = useTranslation();
   if (strengths.length === 0) {
-    return <p className="text-body-default text-muted-foreground">No clear strengths surfaced.</p>;
+    return <p className="text-body-default text-muted-foreground">{t('matching.strengths.empty')}</p>;
   }
   return (
     <ul className="space-y-4">

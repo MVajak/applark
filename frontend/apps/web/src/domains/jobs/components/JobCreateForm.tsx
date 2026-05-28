@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { i18n, useTranslation } from '@applark/i18n';
 import { Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from '@applark/ui';
 
 import { getErrorDetail, getErrorDetailObject, getErrorStatus } from '@/domains/api/client';
@@ -13,13 +14,14 @@ function handleDuplicate(err: unknown, navigate: ReturnType<typeof useNavigate>,
   const detail = getErrorDetailObject(err);
   const existingId = detail?.existing_job_id;
   if (typeof existingId !== 'string') return false;
-  toast('This URL is already on your list — opening it.');
+  toast(i18n.t('jobs.create.toastDuplicate'));
   onCreated();
   navigate(`/jobs/${existingId}`);
   return true;
 }
 
 export function JobCreateForm({ onCreated }: { onCreated: () => void }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -29,12 +31,12 @@ export function JobCreateForm({ onCreated }: { onCreated: () => void }) {
     mutation: {
       onSuccess: async () => {
         await invalidateJobs();
-        toast.success('Job queued — scraping…');
+        toast.success(t('jobs.create.toastScraping'));
         onCreated();
       },
       onError: (err) => {
         if (handleDuplicate(err, navigate, onCreated)) return;
-        toast.error(getErrorDetail(err) ?? 'Failed to add job from URL');
+        toast.error(getErrorDetail(err) ?? t('jobs.create.errorFromUrl'));
       },
     },
   });
@@ -43,12 +45,12 @@ export function JobCreateForm({ onCreated }: { onCreated: () => void }) {
     mutation: {
       onSuccess: async () => {
         await invalidateJobs();
-        toast.success('Job queued — extracting…');
+        toast.success(t('jobs.create.toastExtracting'));
         onCreated();
       },
       onError: (err) => {
         if (handleDuplicate(err, navigate, onCreated)) return;
-        toast.error(getErrorDetail(err) ?? 'Failed to add job from text');
+        toast.error(getErrorDetail(err) ?? t('jobs.create.errorFromText'));
       },
     },
   });
@@ -60,7 +62,7 @@ export function JobCreateForm({ onCreated }: { onCreated: () => void }) {
   const submitUrl = (event: FormEvent) => {
     event.preventDefault();
     if (!url.trim()) {
-      toast.error('Paste a URL first');
+      toast.error(t('jobs.create.errorPasteUrl'));
       return;
     }
     fromUrl.mutate({ data: { source_url: url.trim() } });
@@ -69,7 +71,7 @@ export function JobCreateForm({ onCreated }: { onCreated: () => void }) {
   const submitText = (event: FormEvent) => {
     event.preventDefault();
     if (!rawText.trim()) {
-      toast.error('Paste the posting text first');
+      toast.error(t('jobs.create.errorPasteText'));
       return;
     }
     fromText.mutate({
@@ -83,25 +85,25 @@ export function JobCreateForm({ onCreated }: { onCreated: () => void }) {
   return (
     <Tabs defaultValue="url" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="url">From URL</TabsTrigger>
-        <TabsTrigger value="text">From Text</TabsTrigger>
+        <TabsTrigger value="url">{t('jobs.create.tabUrl')}</TabsTrigger>
+        <TabsTrigger value="text">{t('jobs.create.tabText')}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="url" className="mt-4">
         <form onSubmit={submitUrl} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="job-url">Job posting URL</Label>
+            <Label htmlFor="job-url">{t('jobs.create.urlLabel')}</Label>
             <Input
               id="job-url"
               type="url"
-              placeholder="https://example.com/jobs/12345"
+              placeholder={t('jobs.create.urlPlaceholder')}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
           </div>
           <div className="flex justify-end">
             <Button type="submit" disabled={fromUrl.isPending}>
-              {fromUrl.isPending ? 'Adding…' : 'Add'}
+              {fromUrl.isPending ? t('jobs.create.adding') : t('jobs.create.add')}
             </Button>
           </div>
         </form>
@@ -110,28 +112,28 @@ export function JobCreateForm({ onCreated }: { onCreated: () => void }) {
       <TabsContent value="text" className="mt-4">
         <form onSubmit={submitText} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="job-text">Job posting text</Label>
+            <Label htmlFor="job-text">{t('jobs.create.textLabel')}</Label>
             <Textarea
               id="job-text"
               rows={10}
-              placeholder="Paste the full job posting here…"
+              placeholder={t('jobs.create.textPlaceholder')}
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="job-source-url">Source URL (optional)</Label>
+            <Label htmlFor="job-source-url">{t('jobs.create.sourceUrlLabel')}</Label>
             <Input
               id="job-source-url"
               type="url"
-              placeholder="https://example.com/jobs/12345"
+              placeholder={t('jobs.create.urlPlaceholder')}
               value={sourceUrl}
               onChange={(e) => setSourceUrl(e.target.value)}
             />
           </div>
           <div className="flex justify-end">
             <Button type="submit" disabled={fromText.isPending}>
-              {fromText.isPending ? 'Adding…' : 'Add'}
+              {fromText.isPending ? t('jobs.create.adding') : t('jobs.create.add')}
             </Button>
           </div>
         </form>

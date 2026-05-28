@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
+import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { Button, Card } from '@applark/ui';
 
 import type { JobRequirementRead } from '@/domains/api/generated/model/jobRequirementRead';
@@ -12,10 +13,10 @@ const CATEGORY_ORDER: readonly RequirementCategory[] = [
   RequirementCategory.responsibility,
 ];
 
-const CATEGORY_LABEL: Record<RequirementCategory, string> = {
-  required: 'Required',
-  nice_to_have: 'Nice to have',
-  responsibility: 'Responsibilities',
+const CATEGORY_LABEL_KEY: Record<RequirementCategory, TranslationKey> = {
+  required: 'jobs.requirements.category.required',
+  nice_to_have: 'jobs.requirements.category.niceToHave',
+  responsibility: 'jobs.requirements.category.responsibility',
 };
 
 function RequirementGroup({
@@ -56,8 +57,9 @@ function RequirementGroup({
 }
 
 export function RequirementsList({ requirements }: { requirements: JobRequirementRead[] }) {
+  const { t } = useTranslation();
   if (requirements.length === 0) {
-    return <p className="text-body-default text-muted-foreground">No requirements extracted.</p>;
+    return <p className="text-body-default text-muted-foreground">{t('jobs.requirements.empty')}</p>;
   }
 
   const grouped = new Map<RequirementCategory, JobRequirementRead[]>();
@@ -72,7 +74,7 @@ export function RequirementsList({ requirements }: { requirements: JobRequiremen
       {CATEGORY_ORDER.map((category) => (
         <RequirementGroup
           key={category}
-          label={CATEGORY_LABEL[category]}
+          label={t(CATEGORY_LABEL_KEY[category])}
           items={grouped.get(category) ?? []}
           defaultOpen={category === RequirementCategory.required}
         />

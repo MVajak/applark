@@ -1,5 +1,6 @@
 import { Copy } from 'lucide-react';
 
+import { useTranslation } from '@applark/i18n';
 import {
   Badge,
   Button,
@@ -31,6 +32,7 @@ export function CoverLetterDraftCard({
   draft: CoverLetterDraftRead;
   chunkLookup: Map<string, CVChunkRead>;
 }) {
+  const { t } = useTranslation();
   const referenced = draft.referenced_chunks
     .map((id) => ({ id, chunk: chunkLookup.get(id) }))
     .filter((entry): entry is { id: string; chunk: CVChunkRead } => entry.chunk !== undefined);
@@ -55,21 +57,25 @@ export function CoverLetterDraftCard({
         </pre>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => copyToClipboard(draft.body, 'Copied')}>
-            <Copy className="size-3" /> Copy body
+          <Button variant="outline" size="sm" onClick={() => copyToClipboard(draft.body, t('coverLetters.copied'))}>
+            <Copy className="size-3" /> {t('coverLetters.copyBody')}
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => copyToClipboard(`Subject: ${draft.subject}\n\n${draft.body}`, 'Copied with subject')}
+            onClick={() =>
+              copyToClipboard(`Subject: ${draft.subject}\n\n${draft.body}`, t('coverLetters.copiedWithSubject'))
+            }
           >
-            <Copy className="size-3" /> Copy with subject
+            <Copy className="size-3" /> {t('coverLetters.copyWithSubject')}
           </Button>
         </div>
 
         {referenced.length > 0 && (
           <div className="space-y-2 border-border border-t pt-4">
-            <p className="text-body-small text-muted-foreground uppercase tracking-wide">Referenced CV chunks</p>
+            <p className="text-body-small text-muted-foreground uppercase tracking-wide">
+              {t('coverLetters.referencedChunks')}
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {referenced.map(({ id, chunk }) => (
                 <Tooltip key={id}>

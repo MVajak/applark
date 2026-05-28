@@ -1,32 +1,29 @@
 import type { LucideIcon } from 'lucide-react';
 import { ArrowDown, Check, Copy, Pencil, Plus } from 'lucide-react';
 
+import { useTranslation } from '@applark/i18n';
 import { Button, cn, copyToClipboard } from '@applark/ui';
 
 import { SuggestionKind } from '@/domains/api/generated/model/suggestionKind';
 import type { TailorSuggestion } from '@/domains/api/generated/model/tailorSuggestion';
 
-const KIND_STYLES: Record<SuggestionKind, { label: string; icon: LucideIcon; tint: string; iconColor: string }> = {
+const KIND_STYLES: Record<SuggestionKind, { icon: LucideIcon; tint: string; iconColor: string }> = {
   emphasize: {
-    label: 'Make this more prominent',
     icon: Check,
     tint: 'border-positive/30 bg-positive/5',
     iconColor: 'text-positive',
   },
   rephrase: {
-    label: 'Rephrase',
     icon: Pencil,
     tint: 'border-info/30 bg-info/5',
     iconColor: 'text-info',
   },
   add_detail: {
-    label: 'Add detail',
     icon: Plus,
     tint: 'border-warning/30 bg-warning/5',
     iconColor: 'text-warning',
   },
   deprioritize: {
-    label: 'Push this down or remove',
     icon: ArrowDown,
     tint: 'border-border bg-muted/30',
     iconColor: 'text-muted-foreground',
@@ -34,6 +31,7 @@ const KIND_STYLES: Record<SuggestionKind, { label: string; icon: LucideIcon; tin
 };
 
 export function SuggestionCard({ suggestion }: { suggestion: TailorSuggestion }) {
+  const { t } = useTranslation();
   const style = KIND_STYLES[suggestion.kind];
   const Icon = style.icon;
 
@@ -45,7 +43,7 @@ export function SuggestionCard({ suggestion }: { suggestion: TailorSuggestion })
     <div className={cn('space-y-2 rounded-md border p-3', style.tint)}>
       <div className="flex items-center gap-2 text-body-small-bold">
         <Icon className={cn('size-3.5', style.iconColor)} />
-        <span className={style.iconColor}>{style.label}</span>
+        <span className={style.iconColor}>{t(`cvTailor.kind.${suggestion.kind}`)}</span>
       </div>
       <p className="text-body-default text-foreground/90">{suggestion.rationale}</p>
       {suggestion.suggested_text && (
@@ -54,7 +52,7 @@ export function SuggestionCard({ suggestion }: { suggestion: TailorSuggestion })
             {suggestion.suggested_text}
           </blockquote>
           <Button variant="outline" size="sm" onClick={copy} className="h-7 px-2">
-            <Copy className="size-3" /> Copy suggested text
+            <Copy className="size-3" /> {t('cvTailor.copySuggested')}
           </Button>
         </div>
       )}

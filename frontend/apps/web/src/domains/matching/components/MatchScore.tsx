@@ -1,30 +1,32 @@
+import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { cn } from '@applark/ui';
 
 function bandColor(score: number): {
   stroke: string;
   text: string;
-  label: string;
+  labelKey: TranslationKey;
 } {
   if (score >= 0.7)
     return {
       stroke: 'stroke-positive',
       text: 'text-positive',
-      label: 'Strong fit',
+      labelKey: 'matching.score.strong',
     };
   if (score >= 0.4)
     return {
       stroke: 'stroke-warning',
       text: 'text-warning',
-      label: 'Partial fit',
+      labelKey: 'matching.score.partial',
     };
   return {
     stroke: 'stroke-destructive',
     text: 'text-destructive',
-    label: 'Weak fit',
+    labelKey: 'matching.score.weak',
   };
 }
 
 export function MatchScore({ score }: { score: number }) {
+  const { t } = useTranslation();
   const clamped = Math.max(0, Math.min(1, score));
   const radius = 44;
   const circumference = 2 * Math.PI * radius;
@@ -53,8 +55,8 @@ export function MatchScore({ score }: { score: number }) {
         </div>
       </div>
       <div>
-        <div className={cn('font-medium', band.text)}>{band.label}</div>
-        <div className="text-body-small text-muted-foreground">overall score</div>
+        <div className={cn('font-medium', band.text)}>{t(band.labelKey)}</div>
+        <div className="text-body-small text-muted-foreground">{t('matching.score.overall')}</div>
       </div>
     </div>
   );

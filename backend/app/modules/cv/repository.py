@@ -21,11 +21,11 @@ async def get_document(session: AsyncSession, document_id: uuid.UUID) -> CVDocum
 
 
 async def get_document_with_chunks(
-    session: AsyncSession, document_id: uuid.UUID
+    session: AsyncSession, user_id: uuid.UUID, document_id: uuid.UUID
 ) -> CVDocument | None:
     stmt = (
         select(CVDocument)
-        .where(CVDocument.id == document_id)
+        .where(CVDocument.id == document_id, CVDocument.user_id == user_id)
         .options(selectinload(CVDocument.chunks))
     )
     result = await session.execute(stmt)
@@ -48,12 +48,14 @@ async def list_documents(
 
 async def get_latest_document_with_chunks(
     session: AsyncSession,
+    user_id: uuid.UUID,
     *,
     kind: CVDocumentKind | None = None,
 ) -> CVDocument | None:
-    """Return the most recently uploaded document (with chunks loaded)."""
+    """Return the user's most recently uploaded document (with chunks loaded)."""
     stmt = (
         select(CVDocument)
+        .where(CVDocument.user_id == user_id)
         .options(selectinload(CVDocument.chunks))
         .order_by(CVDocument.created_at.desc())
         .limit(1)
@@ -66,6 +68,7 @@ async def get_latest_document_with_chunks(
 
 async def list_documents_with_chunks(
     session: AsyncSession,
+    user_id: uuid.UUID,
     *,
     kind: CVDocumentKind | None = None,
     limit: int = 50,
@@ -73,6 +76,7 @@ async def list_documents_with_chunks(
 ) -> Sequence[CVDocument]:
     stmt = (
         select(CVDocument)
+        .where(CVDocument.user_id == user_id)
         .options(selectinload(CVDocument.chunks))
         .order_by(CVDocument.created_at.desc())
         .limit(limit)
@@ -84,9 +88,11 @@ async def list_documents_with_chunks(
     return result.scalars().all()
 
 
-async def delete_document(session: AsyncSession, document_id: uuid.UUID) -> bool:
+async def delete_document(
+    session: AsyncSession, user_id: uuid.UUID, document_id: uuid.UUID
+) -> bool:
     document = await session.get(CVDocument, document_id)
-    if document is None:
+    if document is None or document.user_id != user_id:
         return False
     await session.delete(document)
     return True

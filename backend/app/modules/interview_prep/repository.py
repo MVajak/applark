@@ -10,6 +10,7 @@ from app.modules.interview_prep.models import InterviewPrepRun
 async def create_run(
     session: AsyncSession,
     *,
+    user_id: uuid.UUID,
     job_id: uuid.UUID,
     role_overview: str,
     likely_areas_of_focus: list[str],
@@ -20,6 +21,7 @@ async def create_run(
     output_tokens: int | None = None,
 ) -> InterviewPrepRun:
     run = InterviewPrepRun(
+        user_id=user_id,
         job_id=job_id,
         role_overview=role_overview,
         likely_areas_of_focus=likely_areas_of_focus,
@@ -35,10 +37,12 @@ async def create_run(
     return run
 
 
-async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> InterviewPrepRun | None:
+async def get_latest_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> InterviewPrepRun | None:
     stmt = (
         select(InterviewPrepRun)
-        .where(InterviewPrepRun.job_id == job_id)
+        .where(InterviewPrepRun.user_id == user_id, InterviewPrepRun.job_id == job_id)
         .order_by(InterviewPrepRun.created_at.desc())
         .limit(1)
     )

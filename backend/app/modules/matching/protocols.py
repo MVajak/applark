@@ -12,5 +12,5 @@ from app.modules.matching.models import MatchRun
 
 class MatchingProvider(Protocol):
     async def get_latest_for_job(
-        self, session: AsyncSession, job_id: uuid.UUID
+        self, session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
     ) -> MatchRun | None: ...

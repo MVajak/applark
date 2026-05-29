@@ -15,6 +15,16 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     ALLOWED_ORIGINS: list[str] = ["http://localhost:5173"]
 
+    # Auth. Secrets have dev-only defaults so the app boots locally; they MUST be
+    # overridden via env in any non-development environment.
+    JWT_SECRET: str = "dev-insecure-jwt-secret-change-me"
+    OTP_PEPPER: str = "dev-insecure-otp-pepper-change-me"
+    JWT_ACCESS_TTL_MINUTES: int = 15
+    JWT_REFRESH_TTL_DAYS: int = 30
+    OTP_TTL_MINUTES: int = 10
+    OTP_MAX_ATTEMPTS: int = 5
+    OTP_REQUEST_LIMIT_PER_HOUR: int = 5
+
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     EMBEDDING_DIMENSIONS: int = 1536
 

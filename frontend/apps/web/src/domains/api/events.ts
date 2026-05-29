@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getGetCvDocumentQueryKey, getGetCvDocumentsQueryKey } from '@/domains/api/generated/cv/cv';
 import { getGetJobQueryKey, getGetJobsQueryKey } from '@/domains/api/generated/jobs/jobs';
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
+import { useAuthStore } from '@/domains/auth/store';
 
 // SSE base URL is the same axios base + /api/v1; orval generates against the
 // same root, so we read VITE_API_BASE_URL directly.
@@ -45,8 +46,10 @@ function isCvProcessingEvent(value: unknown): value is CvProcessingEvent {
  */
 export function useJobEvents(): void {
   const queryClient = useQueryClient();
+  const accessToken = useAuthStore((s) => s.accessToken);
   useEffect(() => {
-    const es = new EventSource(`${SSE_BASE}/jobs/events`);
+    if (!accessToken) return;
+    const es = new EventSource(`${SSE_BASE}/jobs/events?token=${encodeURIComponent(accessToken)}`);
     es.onmessage = (e) => {
       const parsed: unknown = JSON.parse(e.data);
       if (!isJobStatusEvent(parsed)) return;
@@ -54,19 +57,21 @@ export function useJobEvents(): void {
       queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(parsed.job_id) });
     };
     return () => es.close();
-  }, [queryClient]);
+  }, [queryClient, accessToken]);
 }
 
 export function useCvEvents(): void {
   const queryClient = useQueryClient();
+  const accessToken = useAuthStore((s) => s.accessToken);
   useEffect(() => {
-    const es = new EventSource(`${SSE_BASE}/cv/events`);
+    if (!accessToken) return;
+    const es = new EventSource(`${SSE_BASE}/cv/events?token=${encodeURIComponent(accessToken)}`);
     es.onmessage = (e) => {
       const parsed: unknown = JSON.parse(e.data);
       if (!isCvProcessingEvent(parsed)) return;
-      queryClient.invalidateQueries({ queryKey: getGetCvDocumentsQueryKey() });
-      queryClient.invalidateQueries({ queryKey: getGetCvDocumentQueryKey(parsed.document_id) });
+      void queryClient.invalidateQueries({ queryKey: getGetCvDocumentsQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetCvDocumentQueryKey(parsed.document_id) });
     };
     return () => es.close();
-  }, [queryClient]);
+  }, [queryClient, accessToken]);
 }

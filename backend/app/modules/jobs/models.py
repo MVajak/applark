@@ -25,7 +25,12 @@ class Job(Base):
         primary_key=True,
         server_default=func.gen_random_uuid(),
     )
-    source_url: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+    )
+    source_url: Mapped[str | None] = mapped_column(String, nullable=True)
     source_kind: Mapped[JobSourceKind] = mapped_column(
         Enum(JobSourceKind, name="job_source_kind", create_type=False),
     )

@@ -39,7 +39,9 @@ def _select_chunks(chunks: list[CVChunk], strength_ids: set[uuid.UUID]) -> list[
     return selected[:MAX_CHUNKS_PER_DRAFT]
 
 
-async def generate_cover_letter(session: AsyncSession, job_id: uuid.UUID) -> CoverLetterDraftRow:
+async def generate_cover_letter(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> CoverLetterDraftRow:
     """Draft a cover letter using the job, the latest match run, and the CV.
 
     Persists a :class:`CoverLetterDraft` row and returns it. Caller owns
@@ -47,6 +49,7 @@ async def generate_cover_letter(session: AsyncSession, job_id: uuid.UUID) -> Cov
     """
     ctx = await gather_match_feature_context(
         session,
+        user_id,
         job_id,
         needs_ready_subject="drafting",
         no_match_action="generating a cover letter",
@@ -88,6 +91,7 @@ Draft the cover letter per the rules in the system prompt."""
 
     return await cover_letters_repository.create_draft(
         session,
+        user_id=user_id,
         job_id=job_id,
         match_run_id=ctx.match_run.id,
         subject=draft.subject,
@@ -100,5 +104,7 @@ Draft the cover letter per the rules in the system prompt."""
     )
 
 
-async def list_for_job(session: AsyncSession, job_id: uuid.UUID) -> Sequence[CoverLetterDraftRow]:
-    return await cover_letters_repository.list_for_job(session, job_id)
+async def list_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> Sequence[CoverLetterDraftRow]:
+    return await cover_letters_repository.list_for_job(session, user_id, job_id)

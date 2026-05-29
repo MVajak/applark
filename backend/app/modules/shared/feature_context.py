@@ -71,6 +71,7 @@ def chunk_for_prompt(chunk: CVChunk) -> dict[str, object]:
 
 async def gather_match_feature_context(
     session: AsyncSession,
+    user_id: uuid.UUID,
     job_id: uuid.UUID,
     *,
     needs_ready_subject: str,
@@ -85,7 +86,7 @@ async def gather_match_feature_context(
     ``ready``, or no CV with chunks exists; :class:`NoMatchRunError` if the job
     has never been matched.
     """
-    job = await providers.get(JobProvider).get_job_with_requirements(session, job_id)
+    job = await providers.get(JobProvider).get_job_with_requirements(session, user_id, job_id)
     if job is None:
         raise FeaturePrerequisitesError(f"Job {job_id} not found")
     if job.status != JobStatus.ready:
@@ -93,12 +94,12 @@ async def gather_match_feature_context(
             f"Job status is '{job.status.value}'; {needs_ready_subject} needs 'ready'."
         )
 
-    match_run = await providers.get(MatchingProvider).get_latest_for_job(session, job_id)
+    match_run = await providers.get(MatchingProvider).get_latest_for_job(session, user_id, job_id)
     if match_run is None:
         raise NoMatchRunError(f"Run match against your CV before {no_match_action}.")
 
     cv_doc = await providers.get(CVProvider).get_latest_document_with_chunks(
-        session, kind=CVDocumentKind.cv
+        session, user_id, kind=CVDocumentKind.cv
     )
     if cv_doc is None:
         raise FeaturePrerequisitesError(

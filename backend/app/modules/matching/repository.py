@@ -11,6 +11,7 @@ from app.modules.matching.models import MatchRun
 async def create_match_run(
     session: AsyncSession,
     *,
+    user_id: uuid.UUID,
     job_id: uuid.UUID,
     overall_score: float,
     summary: str,
@@ -20,6 +21,7 @@ async def create_match_run(
     output_tokens: int | None = None,
 ) -> MatchRun:
     run = MatchRun(
+        user_id=user_id,
         job_id=job_id,
         overall_score=overall_score,
         summary=summary,
@@ -34,10 +36,12 @@ async def create_match_run(
     return run
 
 
-async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> MatchRun | None:
+async def get_latest_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> MatchRun | None:
     stmt = (
         select(MatchRun)
-        .where(MatchRun.job_id == job_id)
+        .where(MatchRun.user_id == user_id, MatchRun.job_id == job_id)
         .order_by(MatchRun.created_at.desc())
         .limit(1)
     )
@@ -45,7 +49,13 @@ async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> MatchR
     return result.scalar_one_or_none()
 
 
-async def get_history_for_job(session: AsyncSession, job_id: uuid.UUID) -> Sequence[MatchRun]:
-    stmt = select(MatchRun).where(MatchRun.job_id == job_id).order_by(MatchRun.created_at.desc())
+async def get_history_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> Sequence[MatchRun]:
+    stmt = (
+        select(MatchRun)
+        .where(MatchRun.user_id == user_id, MatchRun.job_id == job_id)
+        .order_by(MatchRun.created_at.desc())
+    )
     result = await session.execute(stmt)
     return result.scalars().all()

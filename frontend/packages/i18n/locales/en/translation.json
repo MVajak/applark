@@ -12,7 +12,24 @@
     "cvs": "CVs",
     "search": "Search",
     "openCommandPalette": "Open command palette",
-    "userMenu": "User menu (coming soon)"
+    "userMenu": "Open user menu",
+    "logOut": "Log out"
+  },
+  "auth": {
+    "title": "Sign in to Applark",
+    "subtitle": "Enter your email and we'll send you a 6-digit code.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "emailInvalid": "Enter a valid email address.",
+    "otpSubtitle": "We sent a 6-digit code to {{email}}.",
+    "verify": "Verify",
+    "verifying": "Verifying…",
+    "codeInvalid": "Enter the 6-digit code.",
+    "changeEmail": "Use a different email",
+    "errorRequest": "Could not send the code. Try again.",
+    "errorVerify": "That code didn't work. Try again."
   },
   "theme": {
     "light": "Light",

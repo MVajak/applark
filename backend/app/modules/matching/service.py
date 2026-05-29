@@ -72,10 +72,10 @@ class MatchContext(BaseModel):
 # ----- Builders -----
 
 
-async def find_latest_cv(session: AsyncSession) -> CVDocument:
-    """Return the most recent uploaded CV (kind='cv'), with chunks loaded."""
+async def find_latest_cv(session: AsyncSession, user_id: uuid.UUID) -> CVDocument:
+    """Return the user's most recent uploaded CV (kind='cv'), with chunks loaded."""
     doc = await providers.get(CVProvider).get_latest_document_with_chunks(
-        session, kind=CVDocumentKind.cv
+        session, user_id, kind=CVDocumentKind.cv
     )
     if doc is None:
         raise NoCVUploadedError("No CV uploaded yet — POST /api/v1/cv/documents first.")
@@ -114,9 +114,11 @@ async def _top_chunks_by_embedding(
     ]
 
 
-async def build_match_context(session: AsyncSession, job_id: uuid.UUID) -> MatchContext:
+async def build_match_context(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> MatchContext:
     """Run all deterministic vector search and assemble the agent's input."""
-    job = await providers.get(JobProvider).get_job_with_requirements(session, job_id)
+    job = await providers.get(JobProvider).get_job_with_requirements(session, user_id, job_id)
     if job is None:
         raise JobNotFoundError("Job not found")
     if job.status != JobStatus.ready:
@@ -129,7 +131,7 @@ async def build_match_context(session: AsyncSession, job_id: uuid.UUID) -> Match
             f"Job {job_id} has no embedding — extraction may not have completed"
         )
 
-    cv_doc = await find_latest_cv(session)
+    cv_doc = await find_latest_cv(session, user_id)
     if not cv_doc.chunks:
         raise MissingEmbeddingsError(
             f"CV {cv_doc.id} has no chunks — chunking may not have completed"
@@ -178,9 +180,9 @@ async def build_match_context(session: AsyncSession, job_id: uuid.UUID) -> Match
     )
 
 
-async def run_match(session: AsyncSession, job_id: uuid.UUID) -> MatchRun:
+async def run_match(session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID) -> MatchRun:
     """Build context, call the explainer, persist the run. Caller commits."""
-    context = await build_match_context(session, job_id)
+    context = await build_match_context(session, user_id, job_id)
 
     user_prompt = f"""<job>
 {json.dumps(context.job, indent=2)}
@@ -212,6 +214,7 @@ Now produce a MatchExplanation per the rules in the system prompt."""
 
     return await matching_repository.create_match_run(
         session,
+        user_id=user_id,
         job_id=job_id,
         overall_score=explanation.overall_score,
         summary=explanation.summary,
@@ -222,13 +225,17 @@ Now produce a MatchExplanation per the rules in the system prompt."""
     )
 
 
-async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> MatchRun | None:
+async def get_latest_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> MatchRun | None:
     """Cross-module read backing :class:`~app.modules.matching.protocols.MatchingProvider`."""
-    return await matching_repository.get_latest_for_job(session, job_id)
+    return await matching_repository.get_latest_for_job(session, user_id, job_id)
 
 
-async def get_history_for_job(session: AsyncSession, job_id: uuid.UUID) -> Sequence[MatchRun]:
-    return await matching_repository.get_history_for_job(session, job_id)
+async def get_history_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> Sequence[MatchRun]:
+    return await matching_repository.get_history_for_job(session, user_id, job_id)
 
 
 __all__ = [

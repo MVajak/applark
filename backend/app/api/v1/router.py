@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.modules.auth.router import router as auth_router
 from app.modules.cover_letters.router import router as cover_letters_router
 from app.modules.cv.router import router as cv_router
 from app.modules.cv_tailor.router import router as cv_tailor_router
@@ -15,6 +16,7 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+router.include_router(auth_router)
 router.include_router(cv_router)
 router.include_router(jobs_router)
 router.include_router(matching_router)

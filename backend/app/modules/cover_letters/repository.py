@@ -10,6 +10,7 @@ from app.modules.cover_letters.models import CoverLetterDraft
 async def create_draft(
     session: AsyncSession,
     *,
+    user_id: uuid.UUID,
     job_id: uuid.UUID,
     match_run_id: uuid.UUID | None,
     subject: str,
@@ -21,6 +22,7 @@ async def create_draft(
     output_tokens: int | None = None,
 ) -> CoverLetterDraft:
     draft = CoverLetterDraft(
+        user_id=user_id,
         job_id=job_id,
         match_run_id=match_run_id,
         subject=subject,
@@ -37,10 +39,12 @@ async def create_draft(
     return draft
 
 
-async def list_for_job(session: AsyncSession, job_id: uuid.UUID) -> Sequence[CoverLetterDraft]:
+async def list_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> Sequence[CoverLetterDraft]:
     stmt = (
         select(CoverLetterDraft)
-        .where(CoverLetterDraft.job_id == job_id)
+        .where(CoverLetterDraft.user_id == user_id, CoverLetterDraft.job_id == job_id)
         .order_by(CoverLetterDraft.created_at.desc())
     )
     result = await session.execute(stmt)

@@ -141,19 +141,22 @@ async def mark_job_failed(job_id: uuid.UUID, error_message: str) -> None:
 # ----- CRUD + creation (router-facing; caller owns the transaction) -----
 
 
-async def _ensure_url_unique(session: AsyncSession, url: str | None) -> None:
-    """Raise :class:`DuplicateJobError` if a job already exists for ``url``."""
+async def _ensure_url_unique(session: AsyncSession, user_id: uuid.UUID, url: str | None) -> None:
+    """Raise :class:`DuplicateJobError` if the user already has a job for ``url``."""
     if url is None:
         return
-    existing = await repository.get_by_url(session, url)
+    existing = await repository.get_by_url(session, user_id, url)
     if existing is not None:
         raise DuplicateJobError(existing.id)
 
 
-async def create_job_from_text(session: AsyncSession, payload: CreateJobFromText) -> Job:
+async def create_job_from_text(
+    session: AsyncSession, user_id: uuid.UUID, payload: CreateJobFromText
+) -> Job:
     """Persist a pasted-text job in 'pending'. Caller commits + enqueues extraction."""
-    await _ensure_url_unique(session, payload.source_url)
+    await _ensure_url_unique(session, user_id, payload.source_url)
     job = Job(
+        user_id=user_id,
         source_kind=JobSourceKind.pasted,
         raw_text=payload.raw_text,
         source_url=payload.source_url,
@@ -162,11 +165,14 @@ async def create_job_from_text(session: AsyncSession, payload: CreateJobFromText
     return await repository.add_job(session, job)
 
 
-async def create_job_from_url(session: AsyncSession, payload: CreateJobFromUrl) -> Job:
+async def create_job_from_url(
+    session: AsyncSession, user_id: uuid.UUID, payload: CreateJobFromUrl
+) -> Job:
     """Persist a URL-source job in 'pending'. Caller commits + enqueues scrape."""
     url = str(payload.source_url)
-    await _ensure_url_unique(session, url)
+    await _ensure_url_unique(session, user_id, url)
     job = Job(
+        user_id=user_id,
         source_kind=JobSourceKind.url,
         source_url=url,
         raw_text="",
@@ -177,21 +183,24 @@ async def create_job_from_url(session: AsyncSession, payload: CreateJobFromUrl) 
 
 async def list_jobs(
     session: AsyncSession,
+    user_id: uuid.UUID,
     *,
     status: JobStatus | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> Sequence[Job]:
-    return await repository.list_jobs(session, status=status, limit=limit, offset=offset)
+    return await repository.list_jobs(session, user_id, status=status, limit=limit, offset=offset)
 
 
-async def get_job_with_requirements(session: AsyncSession, job_id: uuid.UUID) -> Job | None:
+async def get_job_with_requirements(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> Job | None:
     """Cross-module read backing :class:`~app.modules.jobs.protocols.JobProvider`."""
-    return await repository.get_job_with_requirements(session, job_id)
+    return await repository.get_job_with_requirements(session, user_id, job_id)
 
 
-async def delete_job(session: AsyncSession, job_id: uuid.UUID) -> bool:
-    return await repository.delete_job(session, job_id)
+async def delete_job(session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID) -> bool:
+    return await repository.delete_job(session, user_id, job_id)
 
 
 async def mark_for_retry(session: AsyncSession, job: Job) -> str:

@@ -10,6 +10,7 @@ from app.modules.cv_tailor.models import CVTailorRun
 async def create_run(
     session: AsyncSession,
     *,
+    user_id: uuid.UUID,
     job_id: uuid.UUID,
     job_summary: str,
     suggestions: list[dict[str, Any]],
@@ -19,6 +20,7 @@ async def create_run(
     output_tokens: int | None = None,
 ) -> CVTailorRun:
     run = CVTailorRun(
+        user_id=user_id,
         job_id=job_id,
         job_summary=job_summary,
         suggestions=suggestions,
@@ -33,10 +35,12 @@ async def create_run(
     return run
 
 
-async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> CVTailorRun | None:
+async def get_latest_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> CVTailorRun | None:
     stmt = (
         select(CVTailorRun)
-        .where(CVTailorRun.job_id == job_id)
+        .where(CVTailorRun.user_id == user_id, CVTailorRun.job_id == job_id)
         .order_by(CVTailorRun.created_at.desc())
         .limit(1)
     )

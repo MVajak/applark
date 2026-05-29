@@ -19,6 +19,11 @@ class CVDocument(Base):
         primary_key=True,
         server_default=func.gen_random_uuid(),
     )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+    )
     kind: Mapped[CVDocumentKind] = mapped_column(
         Enum(CVDocumentKind, name="cv_document_kind", create_type=False),
     )

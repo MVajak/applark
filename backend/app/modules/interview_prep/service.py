@@ -20,7 +20,9 @@ from app.modules.shared.feature_context import (
 logger = structlog.get_logger(__name__)
 
 
-async def generate_interview_prep(session: AsyncSession, job_id: uuid.UUID) -> InterviewPrepRun:
+async def generate_interview_prep(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> InterviewPrepRun:
     """Generate interview prep and persist it. Caller commits.
 
     The agent gets ALL CV chunks (not a top-k subset) because any chunk
@@ -28,6 +30,7 @@ async def generate_interview_prep(session: AsyncSession, job_id: uuid.UUID) -> I
     """
     ctx = await gather_match_feature_context(
         session,
+        user_id,
         job_id,
         needs_ready_subject="interview prep",
         no_match_action="generating interview prep",
@@ -65,6 +68,7 @@ referenced_cv_chunk_ids when the candidate has relevant experience for a questio
 
     return await interview_prep_repository.create_run(
         session,
+        user_id=user_id,
         job_id=job_id,
         role_overview=output.role_overview,
         likely_areas_of_focus=list(output.likely_areas_of_focus),
@@ -76,5 +80,7 @@ referenced_cv_chunk_ids when the candidate has relevant experience for a questio
     )
 
 
-async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> InterviewPrepRun | None:
-    return await interview_prep_repository.get_latest_for_job(session, job_id)
+async def get_latest_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> InterviewPrepRun | None:
+    return await interview_prep_repository.get_latest_for_job(session, user_id, job_id)

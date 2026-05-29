@@ -20,7 +20,9 @@ from app.modules.shared.feature_context import (
 logger = structlog.get_logger(__name__)
 
 
-async def run_cv_tailor(session: AsyncSession, job_id: uuid.UUID) -> CVTailorRun:
+async def run_cv_tailor(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> CVTailorRun:
     """Run the tailor agent and persist the result. Caller commits.
 
     Unlike the cover-letter flow, the agent is given the full CV chunk list
@@ -29,6 +31,7 @@ async def run_cv_tailor(session: AsyncSession, job_id: uuid.UUID) -> CVTailorRun
     """
     ctx = await gather_match_feature_context(
         session,
+        user_id,
         job_id,
         needs_ready_subject="tailor",
         no_match_action="requesting tailor suggestions",
@@ -67,6 +70,7 @@ Produce CV tailor suggestions per the rules above. Reference chunks by their UUI
 
     return await cv_tailor_repository.create_run(
         session,
+        user_id=user_id,
         job_id=job_id,
         job_summary=output.job_summary,
         suggestions=[s.model_dump(mode="json") for s in output.suggestions],
@@ -77,5 +81,7 @@ Produce CV tailor suggestions per the rules above. Reference chunks by their UUI
     )
 
 
-async def get_latest_for_job(session: AsyncSession, job_id: uuid.UUID) -> CVTailorRun | None:
-    return await cv_tailor_repository.get_latest_for_job(session, job_id)
+async def get_latest_for_job(
+    session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
+) -> CVTailorRun | None:
+    return await cv_tailor_repository.get_latest_for_job(session, user_id, job_id)

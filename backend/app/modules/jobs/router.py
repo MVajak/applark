@@ -10,6 +10,7 @@ from app.core.database import SessionLocal
 from app.core.events import EVENTS_JOBS, publish, sse_response
 from app.core.http import conflict_on
 from app.core.redis import get_arq_pool, get_redis
+from app.core.security import AuthUser, get_current_user, get_current_user_query
 from app.modules.jobs import service as jobs_service
 from app.modules.jobs.events import JobStatusEvent
 from app.modules.jobs.schemas import (
@@ -31,11 +32,12 @@ router = APIRouter(prefix="/jobs", tags=["jobs"])
 )
 async def create_job_from_text(
     payload: CreateJobFromText,
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
     arq_pool: Annotated[ArqRedis, Depends(get_arq_pool)],
 ) -> JobRead:
     async with SessionLocal() as session:
         try:
-            job = await jobs_service.create_job_from_text(session, payload)
+            job = await jobs_service.create_job_from_text(session, current_user.id, payload)
         except DuplicateJobError as exc:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -59,11 +61,12 @@ async def create_job_from_text(
 )
 async def create_job_from_url(
     payload: CreateJobFromUrl,
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
     arq_pool: Annotated[ArqRedis, Depends(get_arq_pool)],
 ) -> JobRead:
     async with SessionLocal() as session:
         try:
-            job = await jobs_service.create_job_from_url(session, payload)
+            job = await jobs_service.create_job_from_url(session, current_user.id, payload)
         except DuplicateJobError as exc:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -82,13 +85,14 @@ async def create_job_from_url(
 
 @router.get("", response_model=list[JobListItem])
 async def get_jobs(
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
     status_filter: Annotated[JobStatus | None, Query(alias="status")] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[JobListItem]:
     async with SessionLocal() as session:
         jobs = await jobs_service.list_jobs(
-            session, status=status_filter, limit=limit, offset=offset
+            session, current_user.id, status=status_filter, limit=limit, offset=offset
         )
         return [JobListItem.model_validate(j) for j in jobs]
 
@@ -99,8 +103,9 @@ async def get_jobs(
 async def job_events(
     request: Request,
     redis: Annotated[Redis, Depends(get_redis)],
+    _current_user: Annotated[AuthUser, Depends(get_current_user_query)],
 ) -> StreamingResponse:
-    """SSE stream of JobStatusEvent JSON frames.
+    """SSE stream of JobStatusEvent JSON frames. Auth via ``?token=``.
 
     Excluded from the OpenAPI schema so orval doesn't generate a fetch hook
     for an endpoint that returns text/event-stream.
@@ -109,18 +114,24 @@ async def job_events(
 
 
 @router.get("/{job_id}", response_model=JobRead)
-async def get_job(job_id: uuid.UUID) -> JobRead:
+async def get_job(
+    job_id: uuid.UUID,
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
+) -> JobRead:
     async with SessionLocal() as session:
-        job = await jobs_service.get_job_with_requirements(session, job_id)
+        job = await jobs_service.get_job_with_requirements(session, current_user.id, job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="Job not found")
         return JobRead.model_validate(job)
 
 
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_job(job_id: uuid.UUID) -> None:
+async def delete_job(
+    job_id: uuid.UUID,
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
+) -> None:
     async with SessionLocal() as session:
-        deleted = await jobs_service.delete_job(session, job_id)
+        deleted = await jobs_service.delete_job(session, current_user.id, job_id)
         if not deleted:
             raise HTTPException(status_code=404, detail="Job not found")
         await session.commit()
@@ -133,11 +144,12 @@ async def delete_job(job_id: uuid.UUID) -> None:
 )
 async def retry_job(
     job_id: uuid.UUID,
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
     arq_pool: Annotated[ArqRedis, Depends(get_arq_pool)],
     redis: Annotated[Redis, Depends(get_redis)],
 ) -> JobRead:
     async with SessionLocal() as session:
-        job = await jobs_service.get_job_with_requirements(session, job_id)
+        job = await jobs_service.get_job_with_requirements(session, current_user.id, job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="Job not found")
         with conflict_on(JobNotRetriableError):

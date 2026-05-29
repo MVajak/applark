@@ -1,8 +1,69 @@
-import axios, { type AxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 
-const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+import { type AuthTokens, useAuthStore } from '@/domains/auth/store';
+
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+const instance = axios.create({ baseURL });
+// Separate, interceptor-free client for the refresh call so a 401 on refresh
+// can't recurse back into the refresh logic.
+const refreshClient = axios.create({ baseURL });
+
+instance.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().accessToken;
+  if (token) {
+    config.headers.set('Authorization', `Bearer ${token}`);
+  }
+  return config;
 });
+
+// In-flight refresh shared across concurrent 401s, so we refresh once.
+let refreshInFlight: Promise<string | null> | null = null;
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = useAuthStore.getState().refreshToken;
+  if (!refreshToken) return null;
+  try {
+    const { data } = await refreshClient.post<AuthTokens>('/api/v1/auth/refresh', {
+      refresh_token: refreshToken,
+    });
+    useAuthStore.getState().setTokens(data);
+    return data.access_token;
+  } catch {
+    return null;
+  }
+}
+
+function redirectToLogin(): void {
+  useAuthStore.getState().logout();
+  if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+    window.location.href = '/login';
+  }
+}
+
+instance.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    // Cast adds our one-shot retry flag; safe because we only read/set `_retried`.
+    const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
+    const url = original?.url ?? '';
+    const isAuthCall = url.includes('/auth/');
+
+    if (error.response?.status === 401 && original && !original._retried && !isAuthCall) {
+      original._retried = true;
+      refreshInFlight ??= refreshAccessToken().finally(() => {
+        refreshInFlight = null;
+      });
+      const token = await refreshInFlight;
+      if (token) {
+        original.headers.set('Authorization', `Bearer ${token}`);
+        return instance(original);
+      }
+      redirectToLogin();
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const customAxios = <T>(config: AxiosRequestConfig): Promise<T> => {
   return instance(config).then(({ data }) => data);

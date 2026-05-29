@@ -1,9 +1,19 @@
+import { LogOut, User } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import { type TranslationKey, useTranslation } from '@applark/i18n';
-import { cn } from '@applark/ui';
+import {
+  Avatar,
+  AvatarFallback,
+  cn,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@applark/ui';
 
+import { useAuthStore } from '@/domains/auth/store';
 import { BrandMark } from '@/domains/shell/components/BrandMark';
 import { useSpotlightStore } from '@/domains/shell/spotlight-store';
 import { ThemeToggle } from '@/domains/theme/components/ThemeToggle';
@@ -72,22 +82,40 @@ export function AppHeader() {
           <kbd className="rounded bg-muted px-1.5 py-0.5 text-body-small text-muted-foreground">⌘K</kbd>
         </button>
         <ThemeToggle />
-        <UserMenuPlaceholder />
+        <UserMenu />
       </div>
     </motion.header>
   );
 }
 
-function UserMenuPlaceholder() {
+function UserMenu() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const logout = useAuthStore((s) => s.logout);
+
+  const onLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
-    <button
-      type="button"
-      aria-label={t('nav.userMenu')}
-      title={t('nav.userMenu')}
-      className="ml-1 inline-flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-accent-indigo to-accent-pink text-body-small-bold text-primary-foreground outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring/50"
-    >
-      M
-    </button>
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={t('nav.userMenu')}
+        className="ml-1 rounded-full outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
+        <Avatar className="size-9">
+          <AvatarFallback className="bg-gradient-to-br from-accent-indigo to-accent-pink text-primary-foreground">
+            <User className="size-4" />
+          </AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={onLogout}>
+          <LogOut />
+          {t('nav.logOut')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

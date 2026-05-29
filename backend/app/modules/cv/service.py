@@ -100,45 +100,52 @@ async def persist_cv_chunks(
 async def create_cv_document(
     session: AsyncSession,
     *,
+    user_id: uuid.UUID,
     file_bytes: bytes,
     filename: str | None,
     kind: CVDocumentKind,
 ) -> CVDocument:
     """Parse the uploaded PDF and persist a new CVDocument (no commit)."""
     raw_text = extract_text_from_pdf(file_bytes)
-    document = CVDocument(kind=kind, filename=filename or "unnamed.pdf", raw_text=raw_text)
+    document = CVDocument(
+        user_id=user_id, kind=kind, filename=filename or "unnamed.pdf", raw_text=raw_text
+    )
     return await repository.add_document(session, document)
 
 
 async def list_documents(
     session: AsyncSession,
+    user_id: uuid.UUID,
     *,
     kind: CVDocumentKind | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> Sequence[CVDocument]:
     return await repository.list_documents_with_chunks(
-        session, kind=kind, limit=limit, offset=offset
+        session, user_id, kind=kind, limit=limit, offset=offset
     )
 
 
 async def get_document_with_chunks(
-    session: AsyncSession, document_id: uuid.UUID
+    session: AsyncSession, user_id: uuid.UUID, document_id: uuid.UUID
 ) -> CVDocument | None:
-    return await repository.get_document_with_chunks(session, document_id)
+    return await repository.get_document_with_chunks(session, user_id, document_id)
 
 
-async def delete_document(session: AsyncSession, document_id: uuid.UUID) -> bool:
-    return await repository.delete_document(session, document_id)
+async def delete_document(
+    session: AsyncSession, user_id: uuid.UUID, document_id: uuid.UUID
+) -> bool:
+    return await repository.delete_document(session, user_id, document_id)
 
 
 async def get_latest_document_with_chunks(
     session: AsyncSession,
+    user_id: uuid.UUID,
     *,
     kind: CVDocumentKind | None = None,
 ) -> CVDocument | None:
     """Cross-module read backing :class:`~app.modules.cv.protocols.CVProvider`."""
-    return await repository.get_latest_document_with_chunks(session, kind=kind)
+    return await repository.get_latest_document_with_chunks(session, user_id, kind=kind)
 
 
 async def reprocess_cv_document(session: AsyncSession, document_id: uuid.UUID) -> tuple[int, int]:

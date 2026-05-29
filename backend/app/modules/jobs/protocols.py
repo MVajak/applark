@@ -12,5 +12,5 @@ from app.modules.jobs.models import Job
 
 class JobProvider(Protocol):
     async def get_job_with_requirements(
-        self, session: AsyncSession, job_id: uuid.UUID
+        self, session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
     ) -> Job | None: ...

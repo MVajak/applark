@@ -12,6 +12,7 @@ Tests can swap in a fake implementation by re-registering.
 
 from __future__ import annotations
 
+import uuid
 from typing import Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +25,7 @@ class CVProvider(Protocol):
     async def get_latest_document_with_chunks(
         self,
         session: AsyncSession,
+        user_id: uuid.UUID,
         *,
         kind: CVDocumentKind | None = None,
     ) -> CVDocument | None: ...

@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useFormat } from '@applark/format';
 import { useTranslation } from '@applark/i18n';
 import {
   AlertDialog,
@@ -20,7 +21,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  relativeTime,
 } from '@applark/ui';
 
 import { getGetCvDocumentsQueryKey, useDeleteCvDocument } from '@/domains/api/generated/cv/cv';
@@ -29,6 +29,7 @@ import { CVChunkList } from '@/domains/cv/components/CVChunkList';
 
 export function CVDocumentCard({ document }: { document: CVDocumentRead }) {
   const { t } = useTranslation();
+  const fmt = useFormat();
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const isProcessing = document.chunks.length === 0;
@@ -51,7 +52,7 @@ export function CVDocumentCard({ document }: { document: CVDocumentRead }) {
             <CardTitle className="truncate text-title-small-bold">{document.filename}</CardTitle>
             <div className="flex items-center gap-2 text-body-small text-muted-foreground">
               <Badge variant="secondary">{t(`cv.kind.${document.kind}`)}</Badge>
-              <span>{relativeTime(document.created_at)}</span>
+              <span>{fmt.relativeTime(document.created_at)}</span>
               {isProcessing && (
                 <Badge variant="outline" className="animate-pulse">
                   {t('cv.card.processing')}

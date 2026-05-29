@@ -11,6 +11,7 @@
     "gen:api": "orval --config orval.config.ts"
   },
   "dependencies": {
+    "@applark/format": "workspace:*",
     "@applark/i18n": "workspace:*",
     "@applark/ui": "workspace:*",
     "@hookform/resolvers": "^5.4.0",

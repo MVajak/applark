@@ -2,14 +2,16 @@ import { ArrowUpRight, Briefcase } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
+import { useFormat } from '@applark/format';
 import { useTranslation } from '@applark/i18n';
-import { Card, relativeTime } from '@applark/ui';
+import { Card } from '@applark/ui';
 
 import type { JobListItem } from '@/domains/api/generated/model/jobListItem';
 import { JobStatusBadge } from '@/domains/jobs/components/JobStatusBadge';
 
 export function RecentJobsStrip({ jobs }: { jobs: JobListItem[] }) {
   const { t } = useTranslation();
+  const fmt = useFormat();
   if (jobs.length === 0) return null;
 
   return (
@@ -40,7 +42,7 @@ export function RecentJobsStrip({ jobs }: { jobs: JobListItem[] }) {
               </div>
               <div className="flex items-center justify-between gap-2 pt-1">
                 <JobStatusBadge status={job.status} />
-                <span className="text-body-small text-muted-foreground">{relativeTime(job.created_at)}</span>
+                <span className="text-body-small text-muted-foreground">{fmt.relativeTime(job.created_at)}</span>
               </div>
             </Card>
           </Link>

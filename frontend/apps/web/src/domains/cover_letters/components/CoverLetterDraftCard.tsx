@@ -1,5 +1,6 @@
 import { Copy } from 'lucide-react';
 
+import { useFormat } from '@applark/format';
 import { useTranslation } from '@applark/i18n';
 import {
   Badge,
@@ -9,7 +10,6 @@ import {
   CardHeader,
   cn,
   copyToClipboard,
-  relativeTime,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -33,6 +33,7 @@ export function CoverLetterDraftCard({
   chunkLookup: Map<string, CVChunkRead>;
 }) {
   const { t } = useTranslation();
+  const fmt = useFormat();
   const referenced = draft.referenced_chunks
     .map((id) => ({ id, chunk: chunkLookup.get(id) }))
     .filter((entry): entry is { id: string; chunk: CVChunkRead } => entry.chunk !== undefined);
@@ -46,7 +47,7 @@ export function CoverLetterDraftCard({
               {draft.tone}
             </Badge>
           )}
-          <span>{relativeTime(draft.created_at)}</span>
+          <span>{fmt.relativeTime(draft.created_at)}</span>
         </div>
         <h3 className="text-body-large-bold">{draft.subject}</h3>
       </CardHeader>

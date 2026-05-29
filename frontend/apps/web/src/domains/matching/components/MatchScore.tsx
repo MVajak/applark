@@ -1,3 +1,4 @@
+import { useFormat } from '@applark/format';
 import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { cn } from '@applark/ui';
 
@@ -27,12 +28,12 @@ function bandColor(score: number): {
 
 export function MatchScore({ score }: { score: number }) {
   const { t } = useTranslation();
+  const fmt = useFormat();
   const clamped = Math.max(0, Math.min(1, score));
   const radius = 44;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - clamped);
   const band = bandColor(clamped);
-  const percent = Math.round(clamped * 100);
 
   return (
     <div className="flex items-center gap-4">
@@ -51,7 +52,7 @@ export function MatchScore({ score }: { score: number }) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={cn('text-title-default-bold tabular-nums', band.text)}>{percent}%</span>
+          <span className={cn('text-title-default-bold tabular-nums', band.text)}>{fmt.percent(clamped)}</span>
         </div>
       </div>
       <div>

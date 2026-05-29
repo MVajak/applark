@@ -1,14 +1,16 @@
 import { Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { useFormat } from '@applark/format';
 import { useTranslation } from '@applark/i18n';
-import { Card, relativeTime } from '@applark/ui';
+import { Card } from '@applark/ui';
 
 import type { JobListItem } from '@/domains/api/generated/model/jobListItem';
 import { JobStatusBadge } from '@/domains/jobs/components/JobStatusBadge';
 
 export function JobListCard({ job }: { job: JobListItem }) {
   const { t } = useTranslation();
+  const fmt = useFormat();
   const title = job.title ?? t('jobs.untitled');
   const company = job.company ?? t('jobs.unknownCompany');
 
@@ -32,7 +34,7 @@ export function JobListCard({ job }: { job: JobListItem }) {
               {job.location && <span> · {job.location}</span>}
             </div>
           </div>
-          <span className="shrink-0 text-body-small text-muted-foreground">{relativeTime(job.created_at)}</span>
+          <span className="shrink-0 text-body-small text-muted-foreground">{fmt.relativeTime(job.created_at)}</span>
         </div>
       </Card>
     </Link>

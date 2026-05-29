@@ -261,7 +261,7 @@
     },
     "gaps": {
       "empty": "No notable gaps.",
-      "severity": "severity {{percent}}%"
+      "severity": "severity {{value}}"
     }
   },
   "cvTailor": {

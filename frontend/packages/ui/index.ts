@@ -23,5 +23,4 @@ export * from './components/tooltip';
 // Utils
 export { cn } from './utils/cn';
 export { copyToClipboard } from './utils/copyToClipboard';
-export { relativeTime } from './utils/relativeTime';
 export { truncate } from './utils/truncate';

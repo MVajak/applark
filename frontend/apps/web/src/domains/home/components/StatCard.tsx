@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
 
+import { useFormat } from '@applark/format';
 import { Card, cn } from '@applark/ui';
 
 export function StatCard({
@@ -17,8 +18,9 @@ export function StatCard({
   tone?: 'neutral' | 'positive' | 'warning' | 'destructive';
   loading?: boolean;
 }) {
+  const fmt = useFormat();
   const count = useMotionValue(0);
-  const rounded = useTransform(count, (v) => Math.round(v).toString());
+  const rounded = useTransform(count, (v) => fmt.number(Math.round(v)));
 
   useEffect(() => {
     const controls = animate(count, value, { duration: 0.9, ease: 'easeOut' });

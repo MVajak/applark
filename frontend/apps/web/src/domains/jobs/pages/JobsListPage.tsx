@@ -3,6 +3,7 @@ import { Briefcase, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
 
+import { useFormat } from '@applark/format';
 import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { Button, cn, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Skeleton } from '@applark/ui';
 
@@ -129,6 +130,7 @@ function FilterBar({
   counts: { all: number; ready: number; active: number; failed: number };
 }) {
   const { t } = useTranslation();
+  const fmt = useFormat();
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {FILTERS.map((f) => {
@@ -153,7 +155,7 @@ function FilterBar({
               />
             )}
             <span className="relative">
-              {t(f.labelKey)} <span className="ml-1 text-muted-foreground tabular-nums">{count}</span>
+              {t(f.labelKey)} <span className="ml-1 text-muted-foreground tabular-nums">{fmt.number(count)}</span>
             </span>
           </button>
         );

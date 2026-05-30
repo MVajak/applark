@@ -4,10 +4,12 @@ from collections.abc import Sequence
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import providers
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.embeddings import get_embedding, get_embeddings
 from app.core.llm import extract_token_usage
+from app.modules.billing.protocols import BillingProvider
 from app.modules.jobs import repository
 from app.modules.jobs.agent import job_extractor
 from app.modules.jobs.models import Job, JobRequirement
@@ -153,7 +155,11 @@ async def _ensure_url_unique(session: AsyncSession, user_id: uuid.UUID, url: str
 async def create_job_from_text(
     session: AsyncSession, user_id: uuid.UUID, payload: CreateJobFromText
 ) -> Job:
-    """Persist a pasted-text job in 'pending'. Caller commits + enqueues extraction."""
+    """Persist a pasted-text job in 'pending'. Caller commits + enqueues extraction.
+
+    AI job import is a paid capability — gate before persisting/enqueuing.
+    """
+    await providers.get(BillingProvider).assert_paid_tier(user_id)
     await _ensure_url_unique(session, user_id, payload.source_url)
     job = Job(
         user_id=user_id,
@@ -168,7 +174,11 @@ async def create_job_from_text(
 async def create_job_from_url(
     session: AsyncSession, user_id: uuid.UUID, payload: CreateJobFromUrl
 ) -> Job:
-    """Persist a URL-source job in 'pending'. Caller commits + enqueues scrape."""
+    """Persist a URL-source job in 'pending'. Caller commits + enqueues scrape.
+
+    AI job import is a paid capability — gate before persisting/enqueuing.
+    """
+    await providers.get(BillingProvider).assert_paid_tier(user_id)
     url = str(payload.source_url)
     await _ensure_url_unique(session, user_id, url)
     job = Job(
@@ -213,6 +223,8 @@ async def mark_for_retry(session: AsyncSession, job: Job) -> str:
         raise JobNotRetriableError(
             f"Job status is '{job.status.value}'; only 'failed' jobs can be retried"
         )
+    # Retry re-runs AI extraction, so it stays behind the paid-tier gate.
+    await providers.get(BillingProvider).assert_paid_tier(job.user_id)
     job.status = JobStatus.pending
     job.error_message = None
     return "scrape_and_extract_job" if job.source_kind == JobSourceKind.url else "extract_job"

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import type { QueryKey } from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
+import { Coins, type LucideIcon } from 'lucide-react';
 
 import { type TranslationKey, useTranslation } from '@applark/i18n';
 import { Button, Card, Skeleton } from '@applark/ui';
@@ -9,8 +9,11 @@ import { Button, Card, Skeleton } from '@applark/ui';
 import { useGetCvDocuments } from '@/domains/api/generated/cv/cv';
 import { useGetLatestMatch } from '@/domains/api/generated/matching/matching';
 import type { CVChunkRead } from '@/domains/api/generated/model/cVChunkRead';
+import { useCreditsModalStore } from '@/domains/billing/credits-modal-store';
+import type { BillingFeature } from '@/domains/billing/hooks/useBilling';
+import { useSubscription } from '@/domains/billing/hooks/useSubscription';
 import { PendingFeatureCard } from '@/domains/jobs/components/PendingFeatureCard';
-import { useFeatureMutationOptions } from '@/domains/jobs/hooks/useRunFeatureMutation';
+import { useFeatureMutationOptions } from '@/domains/jobs/hooks/useFeatureMutationOptions';
 import { DisabledButtonWithTooltip } from '@/domains/shell/components/DisabledButtonWithTooltip';
 
 type FeatureMutationOptions = ReturnType<typeof useFeatureMutationOptions>;
@@ -34,6 +37,8 @@ type RunMutation = {
 export type FeatureSectionConfig<TData, TResult extends TData = TData> = {
   /** Icon shown on the run / re-run buttons. */
   icon: LucideIcon;
+  /** Billing feature this section maps to — drives credit cost + gating. */
+  creditFeature: BillingFeature;
   /** When true, the CTA is gated behind an existing match run. */
   requiresMatch: boolean;
   /** orval query hook for the latest persisted run. */
@@ -51,8 +56,6 @@ export type FeatureSectionConfig<TData, TResult extends TData = TData> = {
   copy: {
     /** Intro shown above the run CTA when the feature is ready. */
     ready: TranslationKey;
-    /** Optional cost/footnote line under `ready`. */
-    cost?: TranslationKey;
     /** Shown when `requiresMatch` is true and no match exists yet. */
     needsMatch?: TranslationKey;
     runLabel: TranslationKey;
@@ -77,7 +80,12 @@ export function FeatureSection<TData, TResult extends TData = TData>({
   jobId: string;
 }) {
   const { t } = useTranslation();
+  const openCreditsModal = useCreditsModalStore((s) => s.open);
   const [hasTriggered, setHasTriggered] = useState(false);
+
+  const subscription = useSubscription();
+  const gate = subscription.featureGate(config.creditFeature);
+  const cost = subscription.cost(config.creditFeature);
 
   const matchQuery = useGetLatestMatch(jobId);
   const latestQuery = config.useLatest(jobId);
@@ -101,6 +109,44 @@ export function FeatureSection<TData, TResult extends TData = TData>({
 
   const Icon = config.icon;
 
+  // The run / re-run CTA, gated by the per-feature subscription gate. `locked`
+  // (tier doesn't unlock) and `insufficient` (can't afford) both disable the
+  // button with an explanatory tooltip; `ready` fires the mutation.
+  const runButton = (label: string, variant: 'default' | 'outline') => {
+    switch (gate.status) {
+      case 'locked':
+        return <DisabledButtonWithTooltip label={label} hint={t('billing.lockedHint')} />;
+      case 'insufficient':
+        return <DisabledButtonWithTooltip label={label} hint={t('billing.insufficientHint', { count: gate.cost })} />;
+      case 'ready':
+        return (
+          <Button variant={variant === 'outline' ? 'outline' : undefined} onClick={() => mutation.mutate({ jobId })}>
+            <Icon className="size-4" />
+            {label}
+          </Button>
+        );
+      default: {
+        const _exhaustive: never = gate;
+        throw new Error(`Unhandled feature gate: ${JSON.stringify(_exhaustive)}`);
+      }
+    }
+  };
+
+  // Inline "Buy credits" link, shown only when the tier is unlocked but the
+  // balance can't cover a run. Opens the buy-credits modal so the user can
+  // top up without leaving the job.
+  const buyCreditsLink =
+    gate.status === 'insufficient' ? (
+      <button
+        type="button"
+        onClick={openCreditsModal}
+        className="flex items-center gap-1 text-body-small text-primary underline-offset-2 hover:underline"
+      >
+        <Coins className="size-3.5" />
+        {t('billing.buyCredits')}
+      </button>
+    ) : null;
+
   if (latestQuery.isLoading || (config.requiresMatch && matchQuery.isLoading)) {
     return <Skeleton className="h-24 w-full" />;
   }
@@ -117,11 +163,9 @@ export function FeatureSection<TData, TResult extends TData = TData>({
     return (
       <div className="space-y-4">
         {config.renderResult({ result: data, chunks, jobId })}
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={() => mutation.mutate({ jobId })}>
-            <Icon className="size-4" />
-            {t(config.copy.rerunLabel)}
-          </Button>
+        <div className="flex items-center justify-end gap-3">
+          {buyCreditsLink}
+          {runButton(t(config.copy.rerunLabel), 'outline')}
         </div>
       </div>
     );
@@ -140,14 +184,17 @@ export function FeatureSection<TData, TResult extends TData = TData>({
 
   return (
     <Card className="flex items-center justify-between gap-4 p-6">
-      <div>
+      <div className="space-y-1">
         <p className="text-body-default">{t(config.copy.ready)}</p>
-        {config.copy.cost ? <p className="text-body-small text-muted-foreground">{t(config.copy.cost)}</p> : null}
+        {cost > 0 ? (
+          <p className="flex items-center gap-1 text-body-small text-muted-foreground">
+            <Coins className="size-3.5 text-primary" />
+            {t('billing.cost', { count: cost })}
+          </p>
+        ) : null}
+        {buyCreditsLink}
       </div>
-      <Button onClick={() => mutation.mutate({ jobId })}>
-        <Icon className="size-4" />
-        {t(config.copy.runLabel)}
-      </Button>
+      {runButton(t(config.copy.runLabel), 'default')}
     </Card>
   );
 }

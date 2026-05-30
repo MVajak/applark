@@ -50,6 +50,7 @@ function CoverLetterDrafts({ drafts, chunks }: { drafts: CoverLetterDraftRead[];
 
 export const coverLetterFeature: FeatureSectionConfig<CoverLetterDraftRead[]> = {
   icon: Sparkles,
+  creditFeature: 'cover_letters',
   requiresMatch: true,
   useLatest: useGetCoverLetters,
   useMutation: useGenerateCoverLetter,
@@ -58,7 +59,6 @@ export const coverLetterFeature: FeatureSectionConfig<CoverLetterDraftRead[]> = 
   pendingCaption: 'coverLetters.pendingCaption',
   copy: {
     ready: 'coverLetters.copy.ready',
-    cost: 'coverLetters.copy.cost',
     needsMatch: 'coverLetters.copy.needsMatch',
     runLabel: 'coverLetters.copy.runLabel',
     rerunLabel: 'coverLetters.copy.rerunLabel',

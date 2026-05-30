@@ -6,7 +6,9 @@ import uuid
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import providers
 from app.core.llm import LLM_MODEL_SMART, extract_token_usage
+from app.modules.billing.protocols import BillingProvider
 from app.modules.interview_prep import repository as interview_prep_repository
 from app.modules.interview_prep.agent import interview_prep_agent
 from app.modules.interview_prep.models import InterviewPrepRun
@@ -51,7 +53,13 @@ async def generate_interview_prep(
 Generate interview prep per the rules above. Reference chunks by their UUID in
 referenced_cv_chunk_ids when the candidate has relevant experience for a question."""
 
-    result = await interview_prep_agent.run(user_prompt)
+    billing = providers.get(BillingProvider)
+    await billing.charge(user_id, "interview_prep")
+    try:
+        result = await interview_prep_agent.run(user_prompt)
+    except Exception:
+        await billing.refund(user_id, "interview_prep")
+        raise
     output = result.output
     input_tokens, output_tokens = extract_token_usage(result.usage())
 

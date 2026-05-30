@@ -6,7 +6,9 @@ import uuid
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import providers
 from app.core.llm import LLM_MODEL_SMART, extract_token_usage
+from app.modules.billing.protocols import BillingProvider
 from app.modules.cv_tailor import repository as cv_tailor_repository
 from app.modules.cv_tailor.agent import cv_tailor
 from app.modules.cv_tailor.models import CVTailorRun
@@ -53,7 +55,13 @@ async def run_cv_tailor(
 
 Produce CV tailor suggestions per the rules above. Reference chunks by their UUID in cv_chunk_id."""
 
-    result = await cv_tailor.run(user_prompt)
+    billing = providers.get(BillingProvider)
+    await billing.charge(user_id, "cv_tailor")
+    try:
+        result = await cv_tailor.run(user_prompt)
+    except Exception:
+        await billing.refund(user_id, "cv_tailor")
+        raise
     output = result.output
     input_tokens, output_tokens = extract_token_usage(result.usage())
 

@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useTranslation } from '@applark/i18n';
 import { Badge, Card } from '@applark/ui';
 
-import { useCapabilities } from '@/domains/auth/capabilities';
+import { useCapabilities } from '@/domains/auth/hooks/useCapabilities';
 import { JOB_ACTIONS, type JobAction, type JobActionId } from '@/domains/jobs/actions';
 
 export function ActionGrid({ onSelect }: { onSelect: (action: JobActionId) => void }) {
@@ -43,7 +43,7 @@ function ActionCard({
       <Card aria-disabled className="cursor-not-allowed gap-3 p-5 opacity-60">
         <CardInner action={action} icon={<Icon className="size-8 text-muted-foreground" />} />
         <Badge variant="outline" className="w-fit">
-          {t('common.comingSoon')}
+          {t('billing.upgrade')}
         </Badge>
       </Card>
     );

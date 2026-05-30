@@ -1,4 +1,4 @@
-import { LogOut, User } from 'lucide-react';
+import { Coins, LogOut, Sparkles, User } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
@@ -6,14 +6,18 @@ import { type TranslationKey, useTranslation } from '@applark/i18n';
 import {
   Avatar,
   AvatarFallback,
+  Badge,
   cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@applark/ui';
 
 import { useAuthStore } from '@/domains/auth/store';
+import { useCreditsModalStore } from '@/domains/billing/credits-modal-store';
+import { useSubscription } from '@/domains/billing/hooks/useSubscription';
 import { BrandMark } from '@/domains/shell/components/BrandMark';
 import { useSpotlightStore } from '@/domains/shell/spotlight-store';
 import { ThemeToggle } from '@/domains/theme/components/ThemeToggle';
@@ -81,6 +85,7 @@ export function AppHeader() {
           <span>{t('nav.search')}</span>
           <kbd className="rounded bg-muted px-1.5 py-0.5 text-body-small text-muted-foreground">⌘K</kbd>
         </button>
+        <BillingChip />
         <ThemeToggle />
         <UserMenu />
       </div>
@@ -88,10 +93,37 @@ export function AppHeader() {
   );
 }
 
+/**
+ * Always-visible credit balance. Tapping it opens the buy-credits modal —
+ * a one-click top-up for subscribers; free users get the modal's
+ * subscribe-first prompt. (Upgrade lives in the avatar menu.)
+ */
+function BillingChip() {
+  const { t } = useTranslation();
+  const openCreditsModal = useCreditsModalStore((s) => s.open);
+  const { credits, isLoading } = useSubscription();
+
+  if (isLoading) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={openCreditsModal}
+      aria-label={t('billing.buyCredits')}
+      className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/40 px-2.5 py-1.5 text-body-small text-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+    >
+      <Coins className="size-3.5 text-primary" />
+      {t('billing.creditsChip', { count: credits })}
+    </button>
+  );
+}
+
 function UserMenu() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
+  const openCreditsModal = useCreditsModalStore((s) => s.open);
+  const { tier, credits, isSubscribed, isPremium } = useSubscription();
 
   const onLogout = () => {
     logout();
@@ -110,7 +142,26 @@ function UserMenu() {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-52">
+        <div className="flex items-center justify-between gap-3 px-2 py-1.5">
+          <Badge variant={isSubscribed ? 'default' : 'outline'}>{t(`billing.tierName.${tier}`)}</Badge>
+          <span className="flex items-center gap-1.5 text-body-small text-muted-foreground">
+            <Coins className="size-3.5 text-primary" />
+            {t('billing.creditsChip', { count: credits })}
+          </span>
+        </div>
+        <DropdownMenuSeparator />
+        {isSubscribed && (
+          <DropdownMenuItem onSelect={openCreditsModal}>
+            <Coins />
+            {t('billing.buyCredits')}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onSelect={() => navigate('/billing')}>
+          <Sparkles />
+          {isPremium ? t('billing.managePlan') : t('billing.upgrade')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={onLogout}>
           <LogOut />
           {t('nav.logOut')}

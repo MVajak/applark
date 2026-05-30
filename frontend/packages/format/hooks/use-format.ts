@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { useTranslation } from '@applark/i18n';
 
-import { formatDate, formatNumber, formatPercent, formatRelativeTime } from './intl';
+import { formatCurrency, formatDate, formatNumber, formatPercent, formatRelativeTime } from '../intl';
 
 /**
  * Formatters bound to the active i18n locale. Re-memoized when the language
@@ -18,6 +18,7 @@ export function useFormat() {
       relativeTime: (value: string | Date) => formatRelativeTime(value, locale),
       number: (value: number, opts?: Intl.NumberFormatOptions) => formatNumber(value, locale, opts),
       percent: (value: number, opts?: Intl.NumberFormatOptions) => formatPercent(value, locale, opts),
+      currency: (value: number, opts?: Intl.NumberFormatOptions) => formatCurrency(value, locale, opts),
     }),
     [locale]
   );

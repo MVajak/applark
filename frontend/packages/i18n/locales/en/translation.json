@@ -84,6 +84,75 @@
   "features": {
     "needsMatchHint": "Run match against your CV first"
   },
+  "billing": {
+    "cost_one": "Costs {{count}} credit",
+    "cost_other": "Costs {{count}} credits",
+    "lockedHint": "Upgrade your plan to use this feature.",
+    "insufficientHint": "Not enough credits — this run needs {{count}}.",
+    "buyCredits": "Buy credits",
+    "upgrade": "Upgrade",
+    "managePlan": "Manage plan",
+    "title": "Plans & billing",
+    "subtitle": "Unlock AI features with a plan, then run them with credits.",
+    "creditsShort": "{{count}} cr",
+    "creditsChip_one": "{{count}} credit",
+    "creditsChip_other": "{{count}} credits",
+    "tierName": {
+      "none": "Free",
+      "pro": "Pro",
+      "premium": "Premium"
+    },
+    "features": {
+      "matching": "AI job match",
+      "cover_letters": "AI cover letter",
+      "cv_tailor": "AI CV tailoring",
+      "interview_prep": "AI interview prep"
+    },
+    "plans": {
+      "free": "Free",
+      "priceMonthly": "{{price}}/mo",
+      "mostPopular": "Most popular",
+      "currentPlan": "Current plan",
+      "subscribe": "Subscribe",
+      "subscribing": "Subscribing…",
+      "switchTo": "Switch to {{tier}}",
+      "toastSubscribed": "You're now on the {{tier}} plan.",
+      "everythingInPro": "Everything in Pro, plus:",
+      "freeNote": "AI features need Pro or Premium.",
+      "freeCurrentNote": "You're on the free plan.",
+      "freeBrowse": "Browse the app & compare plans",
+      "tagline": {
+        "none": "Explore the app — no AI until you subscribe.",
+        "pro": "Your everyday AI job-hunt toolkit.",
+        "premium": "The full AI suite for serious applicants."
+      },
+      "includes": {
+        "cvParsing": "AI CV parsing",
+        "jobImport": "AI job import & extraction"
+      }
+    },
+    "intakeLocked": {
+      "title": "Subscribe to unlock AI",
+      "body": "Uploading & parsing CVs and importing jobs use AI — included with any paid plan. Pick a plan to get started."
+    },
+    "packs": {
+      "credits_one": "{{count}} credit",
+      "credits_other": "{{count}} credits",
+      "buying": "Buying…",
+      "toastPurchased_one": "Added {{count}} credit.",
+      "toastPurchased_other": "Added {{count}} credits."
+    },
+    "credits": {
+      "title": "Buy credits",
+      "subtitle": "One-time top-ups — credits never expire.",
+      "confirm_one": "Buy {{count}} credit",
+      "confirm_other": "Buy {{count}} credits",
+      "subscribeFirst": "Credits power your AI runs — subscribe to a plan first, then top up anytime.",
+      "viewPlans": "View plans"
+    },
+    "errorSubscribe": "Could not change your plan. Try again.",
+    "errorCheckout": "Could not complete the purchase. Try again."
+  },
   "actions": {
     "match": {
       "label": "Match",
@@ -167,7 +236,8 @@
       "errorFromUrl": "Failed to add job from URL",
       "errorFromText": "Failed to add job from text",
       "errorPasteUrl": "Paste a URL first",
-      "errorPasteText": "Paste the posting text first"
+      "errorPasteText": "Paste the posting text first",
+      "errorInvalidUrl": "Enter a valid URL"
     },
     "detail": {
       "notFound": "Job not found.",
@@ -239,7 +309,6 @@
     "pendingCaption": "Analysing fit — this takes a few seconds…",
     "copy": {
       "ready": "See how well your CV maps onto this posting.",
-      "cost": "Uses Claude Sonnet — ~$0.04 per run.",
       "runLabel": "Match against my CV",
       "rerunLabel": "Re-run match",
       "success": "Match complete",
@@ -268,7 +337,6 @@
     "pendingCaption": "Reading your CV and identifying tweaks…",
     "copy": {
       "ready": "Specific, chunk-by-chunk suggestions for adapting your CV to this posting.",
-      "cost": "Uses Claude Sonnet — ~$0.04 per run.",
       "needsMatch": "Tailor suggestions need a match run first so they can target real gaps.",
       "runLabel": "Tailor my CV",
       "rerunLabel": "Re-run",
@@ -293,7 +361,6 @@
     "pendingCaption": "Drafting…",
     "copy": {
       "ready": "Draft a cover letter grounded in your match strengths.",
-      "cost": "Uses Claude Sonnet — ~$0.02 per draft.",
       "needsMatch": "A cover letter draft cites your match strengths — run a match first so it references real CV chunks.",
       "runLabel": "Generate cover letter",
       "rerunLabel": "Generate again",
@@ -316,7 +383,6 @@
     },
     "copy": {
       "ready": "A study sheet of likely questions, suggested angles, and questions to ask back — grounded in this job and your CV.",
-      "cost": "Uses Claude Sonnet — ~$0.05 per run.",
       "needsMatch": "Interview prep needs a match run first so questions can target what this team actually cares about.",
       "runLabel": "Generate interview prep",
       "rerunLabel": "Re-generate",

@@ -4,14 +4,17 @@ from typing import Any, cast
 
 from arq import create_pool
 from arq.connections import RedisSettings
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from redis.asyncio import Redis
 
 from app.api.v1.router import router as v1_router
 from app.core import providers
 from app.core.config import settings
+from app.modules.billing import service as billing_service
+from app.modules.billing.protocols import BillingProvider
 from app.modules.cv import service as cv_service
 from app.modules.cv.protocols import CVProvider
 from app.modules.jobs import service as jobs_service
@@ -26,6 +29,7 @@ from app.modules.matching.protocols import MatchingProvider
 providers.register(CVProvider, cv_service)
 providers.register(JobProvider, jobs_service)
 providers.register(MatchingProvider, matching_service)
+providers.register(BillingProvider, billing_service)
 
 
 @asynccontextmanager
@@ -66,3 +70,21 @@ app.add_middleware(
 )
 
 app.include_router(v1_router, prefix="/api/v1")
+
+
+# Billing gate → HTTP. Kept here (composition root) so feature routers stay billing-free.
+def _feature_not_in_tier_handler(_request: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": str(exc)})
+
+
+def _insufficient_credits_handler(_request: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(status_code=status.HTTP_402_PAYMENT_REQUIRED, content={"detail": str(exc)})
+
+
+def _subscription_required_handler(_request: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": str(exc)})
+
+
+app.add_exception_handler(billing_service.FeatureNotInTierError, _feature_not_in_tier_handler)
+app.add_exception_handler(billing_service.InsufficientCreditsError, _insufficient_credits_handler)
+app.add_exception_handler(billing_service.SubscriptionRequiredError, _subscription_required_handler)

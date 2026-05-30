@@ -1,60 +1,51 @@
-# Worklog — email + OTP login and per-user data scoping
+# Worklog — tiers (PRO/PREMIUM) + pay-as-you-go AI credits
 
 Plan: `~/.claude/plans/lets-validate-how-our-mighty-puffin.md`
-Decisions: dev console OTP (EmailSender abstraction) · access+refresh JWTs · dev DB reset.
 
----
+Model: tier = feature access (none → no AI; PRO → match+cover; PREMIUM → all 4). Credits = pay-as-you-go
+wallet, one-time packs (stub now, Stripe later), flat per-run cost. Free intake. Per-run gate =
+tier!=none AND tier unlocks feature AND credits>=cost (else 403/402). Backend follows the layering default.
 
-## ✅ Backend — DONE & verified (Phases 0–2)
-
-- **Deps/config**: added `pyjwt`, `email-validator`; `JWT_SECRET`, `OTP_PEPPER`, TTLs,
-  `OTP_MAX_ATTEMPTS`, `OTP_REQUEST_LIMIT_PER_HOUR` in `config.py` + `.env.example`
-  (dev-only secret defaults, override in prod).
-- **`app/core/security.py`**: pyjwt access/refresh tokens (HS256, typed `TokenClaims`),
-  OTP **HMAC hashing** (`hash_otp`/`verify_otp_hash`, peppered, constant-time), `AuthUser`,
-  stateless `get_current_user` (HTTPBearer → 401).
-- **`app/modules/auth/`**: `User` + `OtpCode` (stores `code_hash`, `attempt_count`) models,
-  schemas, repository, service (request_otp w/ Redis rate-limit + invalidate-pending +
-  hashed store, verify_otp w/ attempt cap + single-use, refresh), `ConsoleEmailSender`
-  (logs the code in dev), router (`/auth/request-otp|verify-otp|refresh|me`) wired into v1.
-- **Migrations**: `0008_auth` (users + otp_codes); `0009_user_scoping` (user_id NOT NULL FK
-  on cv_documents/jobs/match_runs/cover_letter_drafts/cv_tailor_runs/interview_prep_runs;
-  job-URL uniqueness now per-user). DB reset + upgraded to head.
-- **Scoping**: `user_id` on the 6 models; threaded through providers/protocols,
-  repositories, services, `shared/feature_context`, and **every existing route now requires
-  `get_current_user`**. get-by-id is `WHERE id AND user_id` → 404 cross-user. ARQ tasks
-  unchanged (operate by id on already-scoped rows).
-- **Verified**: `ruff check app` clean · `pyright app` 0 errors · `pytest` 9 passed ·
-  auth flow smoke (code hashed+logged, tokens issued, refresh, wrong code rejected) ·
-  cross-user scoping smoke (A sees own job; B → empty list + None/404).
-
-## ✅ Frontend — DONE & verified (Phases 3–4)
-- `@applark/ui`: copied `InputOTP` (+`input-otp` dep) and the `Field` set; exported.
-- Auth zustand store (persist `applark-auth`); `customAxios` request interceptor (Bearer)
-  + 401 silent-refresh via a bare instance (deduped) → retry / logout+redirect; `pnpm gen:api`
-  generated `useRequestOtp`/`useVerifyOtp`/`useRefresh`.
-- `LoginPage` (email → 6-digit OTP → redirect), `RequireAuth` guard, router split (public
-  `/login` + protected tree), `auth.*` i18n keys, logout in `AppHeader`.
-- SSE: EventSource passes `?token=`; backend `/cv/events` + `/jobs/events` now require a
-  `get_current_user_query` token.
-
-## ✅ Phase 5 — verified
-- Frontend: `pnpm typecheck` ✓ · `pnpm lint` ✓ · `pnpm build` ✓.
-- Backend e2e (live server, curl): request-otp → 200 (code logged + stored **hashed**);
-  verify-otp → tokens; `/jobs` no-token → **401**, with-token → `[]` 200; `/auth/me` → 200;
-  refresh → 200; **OTP reuse → 401** (single-use); SSE no-token → 401, with-token → 200.
-- Cross-user scoping smoke: A sees own job; B → empty + None/404.
+## Phases (each validated before moving on)
+- [x] **P1** — billing config + models + migration 0010 (users.tier, users.credits, credit_ledger) + schemas + repository.
+- [x] **P2** — billing service (get_status/charge/refund/subscribe/grant_pack) + BillingProvider + `/billing` router.
+- [x] **P3** — gate the 4 feature services (charge→agent→refund-on-failure via provider) + central 402/403 handlers.
+- [x] **P4** — FE: useBilling, capabilities-from-access, FeatureSection cost + locked/insufficient CTAs, ActionGrid gating.
+- [x] **P5** — FE: billing page (subscribe + buy pack, RHF+Zod) + header credits-chip/tier + i18n + `formatCurrency`.
+- [x] **P6** — validation (see Review).
 
 ## Review
-Login + per-user scoping complete and verified end-to-end. The one-off `request-otp`
-"hang" seen mid-verification was the network outage interrupting the run, not a code bug —
-on a stable server it returns 200 in ~0.12s.
 
-## Notes / follow-ups
-- Dev DB was reset (approved) — existing jobs/CVs gone; re-seed by logging in + re-adding.
-- SSE endpoints are now auth-gated, but channels are still global (an event only triggers a
-  refetch against already-scoped endpoints, so no data leak) — per-user channels are a future refinement.
-- Refresh tokens are stateless (not server-revocable); revisit if "log out everywhere" is needed.
-- Browser click-through of the login UI not done here (no browser in this env); backend flow +
-  FE build/types are proven. Run `pnpm dev` + API to click through.
-- Not committed yet.
+**Done.** Tiers + pay-as-you-go credits shipped across backend + frontend.
+
+Backend
+- `app/modules/billing/`: `config.py` (FEATURE_COST / FEATURE_TIERS / CREDIT_PACKS — single source of truth),
+  `models.py` (`credit_ledger`), `schemas.py`, `repository.py` (lock_user `FOR UPDATE` / apply_delta / set_tier),
+  `service.py`, `protocols.py` (`BillingProvider`), `router.py` (`/billing`: me/packs/subscribe/checkout).
+- `users.tier` + `users.credits` columns (migration `0010_billing`).
+- The 4 feature services charge-before-agent + refund-on-failure **via `providers.get(BillingProvider)`** (no direct
+  billing import — layering respected). Billing exceptions map to 402/403 centrally in `main.py`, so feature
+  routers stay billing-free.
+
+Frontend
+- `domains/billing/`: `useBilling` (GET /billing/me; fails closed while loading), `pages/BillingPage`,
+  `components/PlanPicker` (RHF+Zod tier form), `components/CreditPacks`.
+- `auth/capabilities` derives from `useBilling().access`; `FeatureSection` shows "Costs N credits" + gated run
+  (tier-lock → Upgrade tooltip, balance < cost → disabled + Buy-credits link); `ActionGrid` locked → Upgrade badge.
+- Header: credits chip / tier badge + Buy-credits / Upgrade items. `@applark/format` gained `formatCurrency`.
+
+Validation
+- Backend: `ruff` ✓, `ruff format --check` ✓, `pyright` 0 errors ✓, `pytest` 9 passed ✓.
+- Backend billing mechanics (throwaway script vs. **real dev DB**, 10/10): none-tier→403, 0-credit→402, grant pack,
+  charge deducts by cost, refund restores, pro can't use premium feature (no deduction), premium unlocks, unknown
+  pack errors, ledger = exact 4-row append-only audit.
+- Backend HTTP contract (live server): none → subscribe PRO (access flips) → checkout (credits granted) → /me reflects.
+- Frontend: `typecheck` ✓, `lint` ✓, `build` ✓. All dynamic i18n keys confirmed present.
+
+Not done by me (needs a human at the browser)
+- Live UI click-through: no headless browser is installed and Playwright wasn't added (heavy dep, not approved).
+  React rendering is type-safe + driven entirely by the verified `/billing/me` contract. Full stack is left running
+  (docker + API + vite + ARQ worker) for the manual journey: log in → header shows "Upgrade" + all 4 actions locked
+  → `/billing` subscribe PRO (match+cover unlock, tailor/interview stay locked) → buy a pack (chip updates) → open
+  Match, see "Costs 2 credits" + enabled run → run drains 2 credits.
+- Nothing committed (commit on request).

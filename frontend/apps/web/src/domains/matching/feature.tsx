@@ -56,6 +56,7 @@ function MatchResult({ exp }: { exp: MatchExplanation }) {
 
 export const matchFeature: FeatureSectionConfig<GetLatestMatch200, MatchRunRead> = {
   icon: Sparkles,
+  creditFeature: 'matching',
   // Match is itself the prerequisite for the other features, so it is never gated.
   requiresMatch: false,
   useLatest: useGetLatestMatch,
@@ -65,7 +66,6 @@ export const matchFeature: FeatureSectionConfig<GetLatestMatch200, MatchRunRead>
   pendingCaption: 'matching.pendingCaption',
   copy: {
     ready: 'matching.copy.ready',
-    cost: 'matching.copy.cost',
     runLabel: 'matching.copy.runLabel',
     rerunLabel: 'matching.copy.rerunLabel',
     success: 'matching.copy.success',

@@ -12,6 +12,7 @@ import type { FeatureSectionConfig } from '@/domains/jobs/components/FeatureSect
 
 export const cvTailorFeature: FeatureSectionConfig<GetLatestCvTailor200, CVTailorRunRead> = {
   icon: Wand2,
+  creditFeature: 'cv_tailor',
   requiresMatch: true,
   useLatest: useGetLatestCvTailor,
   useMutation: useRunCvTailor,
@@ -20,7 +21,6 @@ export const cvTailorFeature: FeatureSectionConfig<GetLatestCvTailor200, CVTailo
   pendingCaption: 'cvTailor.pendingCaption',
   copy: {
     ready: 'cvTailor.copy.ready',
-    cost: 'cvTailor.copy.cost',
     needsMatch: 'cvTailor.copy.needsMatch',
     runLabel: 'cvTailor.copy.runLabel',
     rerunLabel: 'cvTailor.copy.rerunLabel',

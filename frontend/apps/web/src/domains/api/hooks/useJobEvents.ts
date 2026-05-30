@@ -1,24 +1,15 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { getGetCvDocumentQueryKey, getGetCvDocumentsQueryKey } from '@/domains/api/generated/cv/cv';
 import { getGetJobQueryKey, getGetJobsQueryKey } from '@/domains/api/generated/jobs/jobs';
 import { JobStatus } from '@/domains/api/generated/model/jobStatus';
+import { SSE_BASE } from '@/domains/api/sse';
 import { useAuthStore } from '@/domains/auth/store';
-
-// SSE base URL is the same axios base + /api/v1; orval generates against the
-// same root, so we read VITE_API_BASE_URL directly.
-const SSE_BASE = `${import.meta.env.VITE_API_BASE_URL ?? ''}/api/v1`;
 
 type JobStatusEvent = {
   readonly job_id: string;
   readonly status: JobStatus;
   readonly error_message: string | null;
-};
-
-type CvProcessingEvent = {
-  readonly document_id: string;
-  readonly chunks_ready: boolean;
 };
 
 function isJobStatusEvent(value: unknown): value is JobStatusEvent {
@@ -30,12 +21,6 @@ function isJobStatusEvent(value: unknown): value is JobStatusEvent {
     (Object.values(JobStatus) as readonly string[]).includes(v.status) &&
     (v.error_message === null || typeof v.error_message === 'string')
   );
-}
-
-function isCvProcessingEvent(value: unknown): value is CvProcessingEvent {
-  if (typeof value !== 'object' || value === null) return false;
-  const v = value as Record<string, unknown>;
-  return typeof v.document_id === 'string' && typeof v.chunks_ready === 'boolean';
 }
 
 /**
@@ -53,24 +38,8 @@ export function useJobEvents(): void {
     es.onmessage = (e) => {
       const parsed: unknown = JSON.parse(e.data);
       if (!isJobStatusEvent(parsed)) return;
-      queryClient.invalidateQueries({ queryKey: getGetJobsQueryKey() });
-      queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(parsed.job_id) });
-    };
-    return () => es.close();
-  }, [queryClient, accessToken]);
-}
-
-export function useCvEvents(): void {
-  const queryClient = useQueryClient();
-  const accessToken = useAuthStore((s) => s.accessToken);
-  useEffect(() => {
-    if (!accessToken) return;
-    const es = new EventSource(`${SSE_BASE}/cv/events?token=${encodeURIComponent(accessToken)}`);
-    es.onmessage = (e) => {
-      const parsed: unknown = JSON.parse(e.data);
-      if (!isCvProcessingEvent(parsed)) return;
-      void queryClient.invalidateQueries({ queryKey: getGetCvDocumentsQueryKey() });
-      void queryClient.invalidateQueries({ queryKey: getGetCvDocumentQueryKey(parsed.document_id) });
+      void queryClient.invalidateQueries({ queryKey: getGetJobsQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(parsed.job_id) });
     };
     return () => es.close();
   }, [queryClient, accessToken]);

@@ -2,7 +2,9 @@ import { Outlet } from 'react-router-dom';
 
 import { Toaster, TooltipProvider } from '@applark/ui';
 
-import { useCvEvents, useJobEvents } from '@/domains/api/events';
+import { useCvEvents } from '@/domains/api/hooks/useCvEvents';
+import { useJobEvents } from '@/domains/api/hooks/useJobEvents';
+import { BuyCreditsModal } from '@/domains/billing/components/BuyCreditsModal';
 import { AppHeader } from '@/domains/shell/components/AppHeader';
 import { Spotlight } from '@/domains/shell/components/Spotlight';
 
@@ -21,6 +23,7 @@ export function RootLayout() {
         </main>
         <Toaster position="bottom-right" />
         <Spotlight />
+        <BuyCreditsModal />
       </div>
     </TooltipProvider>
   );

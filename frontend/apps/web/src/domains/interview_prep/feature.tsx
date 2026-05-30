@@ -14,6 +14,7 @@ const PENDING_CAPTIONS = ['interviewPrep.pending.0', 'interviewPrep.pending.1', 
 
 export const interviewPrepFeature: FeatureSectionConfig<GetLatestInterviewPrep200, InterviewPrepRunRead> = {
   icon: ClipboardList,
+  creditFeature: 'interview_prep',
   requiresMatch: true,
   useLatest: useGetLatestInterviewPrep,
   useMutation: useGenerateInterviewPrep,
@@ -22,7 +23,6 @@ export const interviewPrepFeature: FeatureSectionConfig<GetLatestInterviewPrep20
   pendingCaption: PENDING_CAPTIONS,
   copy: {
     ready: 'interviewPrep.copy.ready',
-    cost: 'interviewPrep.copy.cost',
     needsMatch: 'interviewPrep.copy.needsMatch',
     runLabel: 'interviewPrep.copy.runLabel',
     rerunLabel: 'interviewPrep.copy.rerunLabel',

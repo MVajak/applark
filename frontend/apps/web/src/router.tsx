@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { RequireAuth } from '@/domains/auth/components/RequireAuth';
 import { LoginPage } from '@/domains/auth/pages/LoginPage';
+import { BillingPage } from '@/domains/billing/pages/BillingPage';
 import { CVPage } from '@/domains/cv/pages/CVPage';
 import { HomePage } from '@/domains/home/pages/HomePage';
 import { JobDetailPage } from '@/domains/jobs/pages/JobDetailPage';
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
           { path: 'cv', element: <CVPage /> },
           { path: 'jobs', element: <JobsListPage /> },
           { path: 'jobs/:id', element: <JobDetailPage /> },
+          { path: 'billing', element: <BillingPage /> },
         ],
       },
     ],

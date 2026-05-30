@@ -17,6 +17,7 @@ from sqlalchemy.future import select
 
 from app.core import providers
 from app.core.llm import LLM_MODEL_SMART, extract_token_usage
+from app.modules.billing.protocols import BillingProvider
 from app.modules.cv.models import CVChunk, CVDocument
 from app.modules.cv.protocols import CVProvider
 from app.modules.cv.schemas import CVDocumentKind
@@ -198,7 +199,13 @@ async def run_match(session: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID
 
 Now produce a MatchExplanation per the rules in the system prompt."""
 
-    result = await match_explainer.run(user_prompt)
+    billing = providers.get(BillingProvider)
+    await billing.charge(user_id, "matching")
+    try:
+        result = await match_explainer.run(user_prompt)
+    except Exception:
+        await billing.refund(user_id, "matching")
+        raise
     explanation = result.output
     input_tokens, output_tokens = extract_token_usage(result.usage())
 

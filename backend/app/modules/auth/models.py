@@ -17,6 +17,10 @@ class User(Base):
         server_default=func.gen_random_uuid(),
     )
     email: Mapped[str] = mapped_column(String, unique=True)
+    # Billing: access tier ('none' | 'pro' | 'premium') + pay-as-you-go credit balance.
+    # Owned by the billing module (read/written only via billing.repository).
+    tier: Mapped[str] = mapped_column(String, default="none", server_default="none")
+    credits: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(),

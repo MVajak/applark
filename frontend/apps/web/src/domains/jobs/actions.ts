@@ -3,7 +3,7 @@ import { ClipboardList, FileText, Sparkles, Wand2 } from 'lucide-react';
 
 import type { TranslationKey } from '@applark/i18n';
 
-import type { Capabilities } from '@/domains/auth/capabilities';
+import type { Capabilities } from '@/domains/auth/hooks/useCapabilities';
 
 export type JobActionId = 'match' | 'cover-letter' | 'tailor' | 'interview-prep';
 

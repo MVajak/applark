@@ -78,3 +78,8 @@ export function formatNumber(value: number, locale: string, opts?: Intl.NumberFo
 export function formatPercent(value: number, locale: string, opts?: Intl.NumberFormatOptions): string {
   return formatNumber(value, locale, { style: 'percent', maximumFractionDigits: 0, ...opts });
 }
+
+/** Currency amount (defaults to whole-dollar USD: 5 → "$5"). */
+export function formatCurrency(value: number, locale: string, opts?: Intl.NumberFormatOptions): string {
+  return formatNumber(value, locale, { style: 'currency', currency: 'USD', maximumFractionDigits: 0, ...opts });
+}

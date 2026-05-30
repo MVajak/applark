@@ -4,9 +4,11 @@ from collections.abc import Sequence
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import providers
 from app.core.config import settings
 from app.core.embeddings import get_embeddings
 from app.core.llm import extract_token_usage
+from app.modules.billing.protocols import BillingProvider
 from app.modules.cv import repository
 from app.modules.cv.agent import cv_extractor
 from app.modules.cv.models import CVChunk, CVDocument
@@ -105,7 +107,11 @@ async def create_cv_document(
     filename: str | None,
     kind: CVDocumentKind,
 ) -> CVDocument:
-    """Parse the uploaded PDF and persist a new CVDocument (no commit)."""
+    """Parse the uploaded PDF and persist a new CVDocument (no commit).
+
+    AI CV parsing is a paid capability, so gate before doing any work.
+    """
+    await providers.get(BillingProvider).assert_paid_tier(user_id)
     raw_text = extract_text_from_pdf(file_bytes)
     document = CVDocument(
         user_id=user_id, kind=kind, filename=filename or "unnamed.pdf", raw_text=raw_text

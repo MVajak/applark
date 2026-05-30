@@ -7,7 +7,9 @@ from collections.abc import Sequence
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import providers
 from app.core.llm import LLM_MODEL_SMART, extract_token_usage
+from app.modules.billing.protocols import BillingProvider
 from app.modules.cover_letters import repository as cover_letters_repository
 from app.modules.cover_letters.agent import cover_letter_drafter
 from app.modules.cover_letters.models import CoverLetterDraft as CoverLetterDraftRow
@@ -73,7 +75,13 @@ async def generate_cover_letter(
 
 Draft the cover letter per the rules in the system prompt."""
 
-    result = await cover_letter_drafter.run(user_prompt)
+    billing = providers.get(BillingProvider)
+    await billing.charge(user_id, "cover_letters")
+    try:
+        result = await cover_letter_drafter.run(user_prompt)
+    except Exception:
+        await billing.refund(user_id, "cover_letters")
+        raise
     draft = result.output
     input_tokens, output_tokens = extract_token_usage(result.usage())
 

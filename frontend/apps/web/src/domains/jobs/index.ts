@@ -10,6 +10,6 @@ export * from './components/JobStatusTimeline';
 export * from './components/PendingFeatureCard';
 export * from './components/RequirementsList';
 export * from './constants';
-export * from './hooks/useRunFeatureMutation';
+export * from './hooks/useFeatureMutationOptions';
 export * from './pages/JobDetailPage';
 export * from './pages/JobsListPage';
